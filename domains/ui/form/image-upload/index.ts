@@ -66,7 +66,7 @@ export function ImageUploadCore(props: ImageUploadPropsCore) {
       zone: $zone,
       img: $img,
     },
-    setValue(url: string) {
+    setValue(url: string, extra: { silence?: boolean } = {}) {
       console.log("[DOMAIN]ui/form/image-upload", url);
       _url = url;
       if (url) {
@@ -77,8 +77,10 @@ export function ImageUploadCore(props: ImageUploadPropsCore) {
       if (!url) {
         $zone.clear();
       }
-      bus.emit(Events.Change, _url);
-      bus.emit(Events.StateChange, { ..._state });
+      if (!extra.silence) {
+        bus.emit(Events.Change, _url);
+        bus.emit(Events.StateChange, { ..._state });
+      }
     },
     clear() {
       $zone.clear();

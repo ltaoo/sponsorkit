@@ -306,8 +306,13 @@ export function PageLogic() {
     }
     $section_form.fields.width.$input.disable();
   });
+  // $sponsor_form.fields.image.$input.onChange((files) => {
+  //   if (files.length === 0) {
+  //     return;
+  //   }
+  //   $sponsor_form.fields.from.setValue("custom");
+  // });
   $sponsor_form.fields.from.$input.onChange((v) => {
-    console.log(v);
     if (v === "alipay") {
       $sponsor_form.fields.image.setValue($canvas.exchange(v, ""));
       return;
@@ -348,7 +353,7 @@ export function PageLogic() {
       return;
     }
     if (_node.type === CoverLayerTypes.Sponsor) {
-      const { text, image, href } = v;
+      const { text, image, from, href } = v;
       const matched = findMatchedSponsor(_node);
       if (!matched) {
         return;
@@ -358,6 +363,7 @@ export function PageLogic() {
         text,
         image,
         href,
+        from,
       });
       refresh();
     }
@@ -404,9 +410,7 @@ export function PageLogic() {
     }
     if (_node.type === CoverLayerTypes.Section) {
       const data = _node.payload;
-      _payload.sections = _payload.sections.filter(
-        (sec) => sec.title !== data.title
-      );
+      _payload.sections = _payload.sections.filter((sec) => sec.id !== data.id);
       refresh();
       clearSelectedNode();
     }
@@ -442,8 +446,8 @@ export function PageLogic() {
     saveAs(blob, "sponsors_payload.json");
   });
   $copy_btn.onClick(() => {
-    //     const data = JSON.stringify(_payload);
-    //     app.copy(data);
+    const data = JSON.stringify(_payload);
+    app.copy(data);
     app.tip({
       text: ["已复制到粘贴板"],
     });

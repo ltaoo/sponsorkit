@@ -16,6 +16,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { DragZonePreview } from "@/components/ui/drag-zone-preview";
 
 import { PageLogic } from "./logic";
+import { GithubIcon } from "@/components/github-icon";
 
 const CoverLayerZIndexMap: Record<CoverLayerTypes, number> = {
   [CoverLayerTypes.Whole]: 0,
@@ -70,6 +71,16 @@ export default function Home() {
         $page.clearSelectedNode();
       }}
     >
+      <div className="fixed bottom-12 right-12">
+        <div className="flex items-center space-x-4">
+          <a href="https://github.com/ltaoo/AppIconsHelper" target="_blank">
+            <GithubIcon className="text-gray-600 rounded-full shadow-lg hover:text-gray-800 cursor-pointer" />
+          </a>
+          {/* <div className="w-[56px] h-[56px] flex items-center justify-center rounded-full shadow-lg  text-gray-600 hover:text-gray-800 cursor-pointer">
+            <LogOut className="w-[48px] h-[48px]" />
+          </div> */}
+        </div>
+      </div>
       {state.authorized ? (
         <div className="mt-8 pb-12 clearfix container-xl px-md-4 px-lg-5 px-3">
           <div>

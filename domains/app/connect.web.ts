@@ -1,14 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StorageCore } from "@/domains/storage/index";
 import { Result } from "@/domains/result/index";
 
 import { Application, MEDIA } from "./index";
 import { ThemeTypes } from "./types";
 
-export function connect<T extends { storage: StorageCore<any> }>(app: Application<T>) {
+export function connect<T extends { storage: StorageCore<any> }>(
+  app: Application<T>
+) {
   const ownerDocument = globalThis.document;
-  app.getComputedStyle = (el: HTMLElement) => {
-    return window.getComputedStyle(el);
-  };
+  // app.getComputedStyle = (el: HTMLElement) => {
+  //   return window.getComputedStyle(el);
+  // };
   app.setTitle = (title: string) => {
     document.title = title;
   };
@@ -21,7 +24,7 @@ export function connect<T extends { storage: StorageCore<any> }>(app: Applicatio
     document.execCommand("copy");
     document.body.removeChild(textArea);
   };
-  window.addEventListener("DOMContentLoaded", (e) => {
+  window.addEventListener("DOMContentLoaded", () => {
     const { innerWidth, innerHeight } = window;
     app.setSize({ width: innerWidth, height: innerHeight });
   });
@@ -31,7 +34,7 @@ export function connect<T extends { storage: StorageCore<any> }>(app: Applicatio
   window.addEventListener("load", () => {
     // console.log("2");
   });
-  window.addEventListener("beforeunload", (event) => {
+  window.addEventListener("beforeunload", () => {
     // // 取消事件
     // event.preventDefault();
     // // Chrome 以及大部分浏览器需要返回值
@@ -42,11 +45,11 @@ export function connect<T extends { storage: StorageCore<any> }>(app: Applicatio
     // return confirmationMessage;
   });
   window.addEventListener("resize", () => {
-    const { innerWidth, innerHeight } = window;
-    const size = {
-      width: innerWidth,
-      height: innerHeight,
-    };
+    // const { innerWidth, innerHeight } = window;
+    // const size = {
+    //   width: innerWidth,
+    //   height: innerHeight,
+    // };
     // 旋转屏幕/进入全屏会触发这里（安卓）
     // app.handleResize(size);
   });
@@ -100,12 +103,12 @@ export function connect<T extends { storage: StorageCore<any> }>(app: Applicatio
     return Result.Ok(systemTheme);
   };
   media.addListener(getSystemTheme);
-  let attribute = "data-theme";
+  const attribute: string = "data-theme";
   const defaultTheme = "system";
   const defaultThemes = ["light", "dark"];
   const colorSchemes = ["light", "dark"];
   const attrs = defaultThemes;
-  app.applyTheme = (theme: ThemeTypes) => {
+  app.applyTheme = () => {
     const d = document.documentElement;
     const name = curTheme;
     if (attribute === "class") {
@@ -120,8 +123,7 @@ export function connect<T extends { storage: StorageCore<any> }>(app: Applicatio
     }
     const fallback = colorSchemes.includes(defaultTheme) ? defaultTheme : null;
     const colorScheme = colorSchemes.includes(curTheme) ? curTheme : fallback;
-    // @ts-ignore
-    d.style.colorScheme = colorScheme;
+    d.style.colorScheme = colorScheme || "";
     return Result.Ok(null);
   };
   app.getSystemTheme = getSystemTheme;

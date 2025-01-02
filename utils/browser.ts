@@ -63,6 +63,16 @@ export function readFileAsArrayBuffer(
   });
 }
 
+export async function readFileAsText(file: File): Promise<Result<string>> {
+  const r = await readFileAsArrayBuffer(file);
+  if (r.error) {
+    return Result.Err(r.error.message);
+  }
+  const decoder = new TextDecoder("utf-8");
+  const content = decoder.decode(r.data);
+  return Result.Ok(content);
+}
+
 export function base64ToFile(base64: string, filename: string) {
   const mimeType = base64.match(/^data:(.*);base64,/)![1];
   const base64Data = base64.replace(/^data:(.*);base64,/, "");

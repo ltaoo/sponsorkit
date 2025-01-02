@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { SliderCore } from "@/domains/ui/slider";
+import { useInitialize } from "@/hooks";
 import { cn } from "@/utils";
 
 export function Slider(
@@ -10,9 +11,9 @@ export function Slider(
 
   const [state, setState] = useState(store.state);
 
-  useEffect(() => {
+  useInitialize(() => {
     store.onStateChange((v) => setState(v));
-  }, []);
+  });
 
   return (
     <div className="relative flex items-center">

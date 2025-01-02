@@ -22,7 +22,7 @@ export class ButtonCore<T = unknown> extends BaseDomain<TheTypesOfEvents<T>> {
   cur: RefCore<T>;
 
   state: ButtonState = {
-    text: "Click it",
+    text: "确定",
     loading: false,
     disabled: false,
   };

@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 import { ImageUploadCore } from "@/domains/ui/form/image-upload/index";
+import { useInitialize } from "@/hooks";
 import { cn } from "@/utils";
 
 import { DragZone } from "./drag-zone";
@@ -12,9 +13,9 @@ export function ImageUpload(
   const { store } = props;
 
   const [state, setState] = useState(store.state);
-  useEffect(() => {
+  useInitialize(() => {
     store.onStateChange((v) => setState(v));
-  }, []);
+  });
 
   return (
     <div className={cn(props.className, "relative")}>

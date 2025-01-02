@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { DragZoneCore } from "@/domains/ui/drag-zone";
+import { useInitialize } from "@/hooks";
 import { cn } from "@/utils";
 
 export function DragZone(
@@ -10,7 +11,9 @@ export function DragZone(
 
   const [state, setState] = useState(store.state);
 
-  store.onStateChange((v) => setState(v));
+  useInitialize(() => {
+    store.onStateChange((v) => setState(v));
+  });
 
   return (
     <div
@@ -41,7 +44,10 @@ export function DragZone(
         // style={{ display: state().selected ? "none" : "block" }}
       >
         <div className="flex items-center justify-center h-full p-4 text-center">
-          <div className="text-[14px]" style={{ display: !state.selected ? "block" : "none" }}>
+          <div
+            className="text-[14px]"
+            style={{ display: !state.selected ? "block" : "none" }}
+          >
             {state.tip}
           </div>
           <input

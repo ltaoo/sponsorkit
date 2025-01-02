@@ -1,7 +1,6 @@
 {
   "sections": [
     {
-      "id": "eXy5uj",
       "title": "Thank you for your support",
       "num_per_line": 2,
       "max_width": 460,
@@ -11,13 +10,13 @@
       "list": [
         {
           "text": "Test",
-          "image": "wechat",
+          "image": "",
+          "from": "wechat",
           "href": "#"
         }
       ]
     },
     {
-      "id": "boCKxI",
       "title": "Gold Sponsors",
       "num_per_line": 6,
       "max_width": 460,
@@ -27,18 +26,19 @@
       "list": [
         {
           "text": "枢衡",
-          "image": "wechat",
+          "image": "",
+          "from": "wechat",
           "href": "https://www.baidu.com"
         },
         {
           "text": "Bob",
-          "image": "alipay",
+          "image": "",
+          "from": "alipay",
           "href": "https://www.baidu.com"
         }
       ]
     },
     {
-      "id": "yiDWPL",
       "title": "Sponsors",
       "num_per_line": 12,
       "gutter": 12,
@@ -47,12 +47,14 @@
       "list": [
         {
           "text": "枢衡",
-          "image": "wechat",
+          "image": "",
+          "from": "wechat",
           "href": "https://www.baidu.com"
         },
         {
           "text": "Bob",
-          "image": "alipay",
+          "image": "",
+          "from": "alipay",
           "href": "https://www.baidu.com"
         }
       ]

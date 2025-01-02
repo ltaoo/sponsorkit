@@ -67,10 +67,21 @@ export function ImageUploadCore(props: ImageUploadPropsCore) {
       img: $img,
     },
     setValue(url: string) {
+      console.log("[DOMAIN]ui/form/image-upload", url);
       _url = url;
-      $zone.setValue(url);
-      $img.setLoaded();
-      $img.setURL(_url);
+      if (url) {
+        $zone.setValue(url);
+        $img.setLoaded();
+        $img.setURL(_url);
+      }
+      if (!url) {
+        $zone.clear();
+      }
+      bus.emit(Events.Change, _url);
+      bus.emit(Events.StateChange, { ..._state });
+    },
+    clear() {
+      $zone.clear();
       bus.emit(Events.Change, _url);
     },
     onChange(handler: Handler<TheTypesOfEvents[Events.Change]>) {

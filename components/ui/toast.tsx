@@ -1,10 +1,10 @@
 /**
  * @file 小黑块 提示
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import * as ToastPrimitive from "@/packages/ui/toast";
-import { useInitialize } from "@/hooks/index";
+// import { useInitialize } from "@/hooks/index";
 import { ToastCore } from "@/domains/ui/toast";
 import { cn } from "@/utils/index";
 
@@ -14,23 +14,30 @@ export const Toast = (props: { store: ToastCore }) => {
   const [state, setState] = useState(store.state);
   const [state2, setState2] = useState(store.$present.state);
 
-  useInitialize(() => {
-    store.onStateChange((nextState) => {
-      setState(nextState);
+  useEffect(() => {
+    store.onStateChange((v) => {
+      setState(v);
     });
     store.$present.onStateChange((v) => setState2(v));
-  });
+  }, []);
+  // useInitialize(() => {
+  //   store.onStateChange((v) => {
+  //     setState(v);
+  //   });
+  //   store.$present.onStateChange((v) => setState2(v));
+  // });
 
   const { texts } = state;
 
   return (
     <ToastPrimitive.Root store={store}>
       <ToastPrimitive.Portal
-        store={store}
         className={cn(
+          "fixed inset-0",
           state2.enter ? "animate-in fade-in" : "",
           state2.exit ? "animate-out fade-out" : ""
         )}
+        store={store}
       >
         <ToastPrimitive.Content
           store={store}

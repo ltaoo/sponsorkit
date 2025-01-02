@@ -1,10 +1,10 @@
 /**
  * @file 控制内容显隐的组件
  */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Show } from "@/packages/ui/show";
-import { useInitialize } from "@/hooks/index";
+// import { useInitialize } from "@/hooks/index";
 import { PresenceCore } from "@/domains/ui/presence";
 import { cn } from "@/utils/index";
 
@@ -19,9 +19,12 @@ export const Presence = (
 
   const [state, setState] = useState(store.state);
 
-  useInitialize(() => {
+  useEffect(() => {
     store.onStateChange((v) => setState(v));
   });
+  // useInitialize(() => {
+  //   store.onStateChange((v) => setState(v));
+  // });
 
   const { visible, mounted } = state;
 

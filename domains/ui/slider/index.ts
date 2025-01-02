@@ -19,12 +19,28 @@ export function SliderCore(props: SliderCoreProps) {
 
   let _min = min;
   let _max = max;
+  let _value = defaultValue;
   let _disabled = disabled;
   let _slider_width = 0;
   // let _thumb_width = 16;
-  let _left = ((defaultValue - _min) / (_max - _min)) * 100;
+  let _left = 0;
+  updateLeft(defaultValue);
   // console.log(defaultValue - _min, _max - _min);
-  let _initial_left = (_left / 100) * _slider_width;
+  let _initial_left = 0;
+  updateInitialLeft();
+
+  function updateLeft(v: number) {
+    _left = ((v - _min) / (_max - _min)) * 100;
+    if (_left < 0) {
+      _left = 0;
+    }
+    if (_left > 100) {
+      _left = 100;
+    }
+  }
+  function updateInitialLeft() {
+    _initial_left = (_left / 100) * _slider_width;
+  }
 
   const _state = {
     get value() {
@@ -54,6 +70,7 @@ export function SliderCore(props: SliderCoreProps) {
       return;
     }
     // const left = (_initial_offset / 100) * _slider_width;
+    // updateLeft()
     let offset = parseFloat(
       (((_initial_left + dx) / _slider_width) * 100).toFixed(2)
     );
@@ -68,7 +85,9 @@ export function SliderCore(props: SliderCoreProps) {
     //     store.updateStop(_stop, { offset });
   });
   $pointer.onPointerUp(() => {
-    _initial_left = (_left / 100) * (_max - _min);
+    updateInitialLeft();
+    bus.emit(Events.Change, _state.value);
+    // console.log("[DOMAIN]ui/slider/index - onPointerUp", _initial_left);
   });
 
   return {
@@ -84,19 +103,26 @@ export function SliderCore(props: SliderCoreProps) {
       console.log("[DOMAIN]ui/slider/index - setWidth", w);
       // _slider_width = w - _thumb_width;
       _slider_width = w;
-      _initial_left = (_left / 100) * _slider_width;
-    },
-    setOffset(v: number) {
-      _initial_left = v;
+      updateInitialLeft();
     },
     setMax(v: number) {
       _max = v;
+      updateLeft(_value);
+      updateInitialLeft();
     },
     setMin(v: number) {
       _min = v;
+      updateLeft(_value);
+      updateInitialLeft();
     },
-    setValue(v: number) {
-      _left = v;
+    setValue(v: number, extra: { silence?: boolean } = {}) {
+      _value = v;
+      updateLeft(v);
+      updateInitialLeft();
+      if (!extra.silence) {
+        bus.emit(Events.Change, _state.value);
+        bus.emit(Events.StateChange, { ..._state });
+      }
     },
     enable() {
       _disabled = false;

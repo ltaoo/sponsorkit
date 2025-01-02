@@ -10,13 +10,16 @@ import { useInitialize } from "@/hooks";
 import { cn } from "@/utils";
 
 import { Portal as PortalPrimitive } from "./portal";
-import { Show } from "./show";
 
-const Root = React.memo((props: { store: DialogCore } & React.AllHTMLAttributes<HTMLElement>) => {
+const Root = (
+  props: { store: DialogCore } & React.AllHTMLAttributes<HTMLElement>
+) => {
   return <>{props.children}</>;
-});
+};
 
-const Portal = React.memo((props: { store: DialogCore } & React.AllHTMLAttributes<HTMLElement>) => {
+const Portal = (
+  props: { store: DialogCore } & React.AllHTMLAttributes<HTMLElement>
+) => {
   const { store } = props;
 
   return (
@@ -26,9 +29,11 @@ const Portal = React.memo((props: { store: DialogCore } & React.AllHTMLAttribute
       </PortalPrimitive>
     </Presence>
   );
-});
+};
 
-const Overlay = React.memo((props: { store: DialogCore } & React.AllHTMLAttributes<HTMLDivElement>) => {
+const Overlay = (
+  props: { store: DialogCore } & React.AllHTMLAttributes<HTMLDivElement>
+) => {
   const { store } = props;
 
   const [state, setState] = useState(store.state);
@@ -48,36 +53,36 @@ const Overlay = React.memo((props: { store: DialogCore } & React.AllHTMLAttribut
       }}
     />
   );
-});
+};
 
-const Content = React.memo(
-  (
-    props: {
-      store: DialogCore;
-    } & React.AllHTMLAttributes<HTMLElement>
-  ) => {
-    const { store } = props;
-    const [state, setState] = useState(store.state);
+const Content = (
+  props: {
+    store: DialogCore;
+  } & React.AllHTMLAttributes<HTMLElement>
+) => {
+  const { store } = props;
+  const [state, setState] = useState(store.state);
 
-    useInitialize(() => {
-      store.onStateChange((nextState) => {
-        setState(nextState);
-      });
+  useInitialize(() => {
+    store.onStateChange((nextState) => {
+      setState(nextState);
     });
+  });
 
-    return (
-      <div className={cn(props.className)} data-state={getState(state.open)}>
-        {props.children}
-      </div>
-    );
-  }
-);
+  return (
+    <div className={cn(props.className)} data-state={getState(state.open)}>
+      {props.children}
+    </div>
+  );
+};
 
-const Description = React.memo((props: {} & React.AllHTMLAttributes<HTMLElement>) => {
+const Description = (props: {} & React.AllHTMLAttributes<HTMLElement>) => {
   return <div className={props.className} {...props} />;
-});
+};
 
-const Close = React.memo((props: { store: DialogCore } & React.AllHTMLAttributes<HTMLElement>) => {
+const Close = (
+  props: { store: DialogCore } & React.AllHTMLAttributes<HTMLElement>
+) => {
   const { store } = props;
   const [state, setState] = useState(store.state);
 
@@ -99,21 +104,23 @@ const Close = React.memo((props: { store: DialogCore } & React.AllHTMLAttributes
       <span className="sr-only">Close</span>
     </div>
   );
-});
+};
 
-const Header = React.memo((props: {} & React.AllHTMLAttributes<HTMLElement>) => {
+const Header = (props: {} & React.AllHTMLAttributes<HTMLElement>) => {
   return <div className={cn(props.className)}>{props.children}</div>;
-});
+};
 
-const Footer = React.memo((props: {} & React.AllHTMLAttributes<HTMLDivElement>) => {
+const Footer = (props: {} & React.AllHTMLAttributes<HTMLDivElement>) => {
   return <div className={cn(props.className)}>{props.children}</div>;
-});
+};
 
-const Title = React.memo((props: {} & React.AllHTMLAttributes<HTMLElement>) => {
+const Title = (props: {} & React.AllHTMLAttributes<HTMLElement>) => {
   return <div className={cn(props.className)}>{props.children}</div>;
-});
+};
 
-const Submit = React.memo((props: { store: DialogCore } & React.AllHTMLAttributes<HTMLButtonElement>) => {
+const Submit = (
+  props: { store: DialogCore } & React.AllHTMLAttributes<HTMLButtonElement>
+) => {
   const { store } = props;
 
   return (
@@ -121,20 +128,38 @@ const Submit = React.memo((props: { store: DialogCore } & React.AllHTMLAttribute
       {props.children}
     </Button>
   );
-});
+};
 
-const Cancel = React.memo((props: { store: DialogCore } & React.AllHTMLAttributes<HTMLButtonElement>) => {
+const Cancel = (
+  props: { store: DialogCore } & React.AllHTMLAttributes<HTMLButtonElement>
+) => {
   const { store } = props;
 
   return (
-    <Button variant="subtle" className={props.className} store={store.cancelBtn}>
+    <Button
+      variant="secondary"
+      className={props.className}
+      store={store.cancelBtn}
+    >
       {props.children}
     </Button>
   );
-});
+};
 
 function getState(open: boolean) {
   return open ? "open" : "closed";
 }
 
-export { Root, Portal, Header, Title, Content, Description, Close, Overlay, Footer, Submit, Cancel };
+export {
+  Root,
+  Portal,
+  Header,
+  Title,
+  Content,
+  Description,
+  Close,
+  Overlay,
+  Footer,
+  Submit,
+  Cancel,
+};

@@ -20,15 +20,19 @@ export enum CoverLayerTypes {
   Gutter,
 }
 type SponsorNode = {
+  id: string;
   text: string;
   image: string;
   href: string;
+  from: string;
 };
 type TitleNode = {
+  id: string;
   title: string;
 };
 type SectionNode = {} & Pick<
   SectionPayload,
+  | "id"
   | "num_per_line"
   | "max_width"
   | "title"
@@ -49,10 +53,10 @@ type BaseCoverLayer<U> = {
   };
 }[keyof U];
 export type CoverLayer = BaseCoverLayer<{
-  [CoverLayerTypes.Whole]: Record<string, string>;
-  [CoverLayerTypes.Gutter]: Record<string, string>;
-  [CoverLayerTypes.Margin]: Record<string, string>;
-  [CoverLayerTypes.Padding]: Record<string, string>;
+  [CoverLayerTypes.Whole]: { id: string };
+  [CoverLayerTypes.Gutter]: { id: string };
+  [CoverLayerTypes.Margin]: { id: string };
+  [CoverLayerTypes.Padding]: { id: string };
   [CoverLayerTypes.Section]: SectionNode;
   // [CoverLayerTypes.QRCodeSection]: SectionNode;
   [CoverLayerTypes.Title]: TitleNode;
@@ -60,13 +64,15 @@ export type CoverLayer = BaseCoverLayer<{
   // [CoverLayerTypes.QRCode]: SponsorNode;
 }>;
 export type CardInSection = {
+  id: string;
   text: string;
   image: string;
   href: string;
+  from: string;
 };
 export type CardImageShape = "rounded" | "circle";
 export type SectionPayload = {
-  // id: string;
+  id: string;
   /** 该 section 标题 */
   title: string;
   /** sponsor 容器的内边距 暂时废弃 */
@@ -75,8 +81,6 @@ export type SectionPayload = {
   gutter: number;
   /** 每一行展示 sponsor 数量 */
   num_per_line: number;
-  /** sponsor 列表 */
-  list: CardInSection[];
   /** 是否展示 sponsor 名称 */
   show_text?: boolean;
   /** 该 section 最大宽度 */
@@ -86,7 +90,9 @@ export type SectionPayload = {
   /** 该 section 从垂直线 y 位置处开始绘制  */
   initial_y?: number;
   /** 用于覆盖 node @todo 这个设计不好看怎么优化 */
-  override?: { type: CoverLayerTypes };
+  // override?: { type: CoverLayerTypes };
+  /** sponsor 列表 */
+  list: CardInSection[];
 };
 export type CanvasPayload = {
   sections: SectionPayload[];
@@ -103,11 +109,11 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
 
   let uid = 1;
 
-  function exchange(url: string) {
-    if (url === "wechat") {
+  function exchange(from: string, url: string) {
+    if (from === "wechat") {
       return WECHAT_AVATAR;
     }
-    if (url === "alipay") {
+    if (from === "alipay") {
       return ALIPAY_AVATAR;
     }
     return url;
@@ -147,22 +153,22 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
       const title_bottom_padding = 6;
       const text_bottom_padding = show_text ? 4 : 0;
       /** sponsors 和 section 标题的上边距 */
-      const sponsors_margin_top_to_title = 8;
+      const sponsors_margin_top_to_title = 18;
       _point.y += title_height;
       // console.log("[BIZ]sponsors - draw section", title, _point);
       let result = `<text x="${_point.x}" y="${_point.y}" text-anchor="middle" class="sponsorkit-tier-title">${title}</text>`;
-      _node_uid += 1;
-      nodes.push({
-        id: `${index}_title_${_node_uid}`,
-        type: CoverLayerTypes.Title,
-        x: global_padding,
-        /** text 的 y 是文字的基线 所以 text 的 y 要减去其高度 */
-        y: _point.y - title_height,
-        width: _width - global_padding * 2,
-        height: title_height + title_bottom_padding,
-        payload: payload,
-      });
-      _point.y += title_height + title_bottom_padding;
+      // _node_uid += 1;
+      // nodes.push({
+      //   id: `${index}_title_${_node_uid}`,
+      //   type: CoverLayerTypes.Title,
+      //   x: global_padding,
+      //   /** text 的 y 是文字的基线 所以 text 的 y 要减去其高度 */
+      //   y: _point.y - title_height,
+      //   width: _width - global_padding * 2,
+      //   height: title_height + title_bottom_padding,
+      //   payload: payload,
+      // });
+      _point.y += title_bottom_padding + sponsors_margin_top_to_title;
       const image_size = (() => {
         const w = max_width || _width - global_padding * 2;
         return to_fixed((w - (num_per_line - 1) * gutter) / num_per_line);
@@ -174,7 +180,7 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
         : global_padding + image_size / 2;
       _point.x = left;
       /** 往下移动 准备绘制 sponsors */
-      _point.y += sponsors_margin_top_to_title;
+      // _point.y += sponsors_margin_top_to_title;
 
       const groups = chunk_array(list, num_per_line);
       for (let i = 0; i < groups.length; i += 1) {
@@ -198,9 +204,9 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
           _point.x = left;
         }
         for (let i = 0; i < list.length; i += 1) {
-          const { text, image: tmp, href = "#" } = list[i];
+          const { text, image: tmp, href = "#", from } = list[i];
           // console.log("[BIZ]sponsors - draw sponsor", text);
-          const image = exchange(tmp);
+          const image = exchange(from, tmp);
           const image_point = {
             x: _point.x - image_size / 2,
             y: _point.y,
@@ -278,15 +284,15 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
       let prev_y = undefined;
       for (let i = 0; i < payload.sections.length; i += 1) {
         const {
-          // id,
+          id,
           title,
           num_per_line,
           max_width,
           gutter,
           show_text,
-          list,
-          override,
+          // override,
           shape,
+          list,
         } = payload.sections[i];
         // console.log(
         //   "[BIZ]sponsors - load draw section",
@@ -296,14 +302,14 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
         // );
         const r = this.drawSection(
           {
-            // id,
+            id,
             title,
             num_per_line,
             max_width,
             gutter,
             show_text,
             shape,
-            override,
+            // override,
             initial_y: prev_y,
             list,
           },
@@ -321,7 +327,7 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
         y: 0,
         width: _width,
         height,
-        payload: {},
+        payload: { id: "whole" },
       });
       const state = {
         content: this.buildContent({ width: _width, height, content: svg }),

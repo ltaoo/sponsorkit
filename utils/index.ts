@@ -1,7 +1,24 @@
 import { twMerge } from "tailwind-merge";
 
+import { JSONObject } from "@/types";
+import { Result } from "@/domains/result";
+
 export function cn(...inputs: unknown[]) {
   return twMerge(inputs as string[]);
+}
+
+/** 解析一段 json 字符串 */
+export function parseJSONStr<T extends JSONObject>(json: string) {
+  try {
+    if (json[0] !== "{") {
+      return Result.Err("不是合法的 json");
+    }
+    const d = JSON.parse(json);
+    return Result.Ok(d as T);
+  } catch (err) {
+    const e = err as Error;
+    return Result.Err(e);
+  }
 }
 
 /**

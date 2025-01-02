@@ -35,7 +35,7 @@ const Overlay = (props: { store: ToastCore } & React.AllHTMLAttributes<HTMLDivEl
 };
 
 const Content = (props: { store: ToastCore } & React.AllHTMLAttributes<HTMLDivElement>) => {
-  const { store } = props;
+  // const { store } = props;
 
   // const [open, setOpen] = useState(store.open);
   // const [state, setState] = useState(store.$present.state);

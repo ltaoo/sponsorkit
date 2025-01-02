@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @file API 请求
  */
@@ -57,15 +58,18 @@ let handler: null | ((v: RequestCore<any>) => void) = null;
 export function onRequestCreated(h: (v: RequestCore<any>) => void) {
   handler = h;
 }
-export type TheResponseOfRequestCore<T extends RequestCore<any, any>> = NonNullable<T["response"]>;
-export type TheResponseOfFetchFunction<T extends FetchFunction> = UnpackedRequestPayload<ReturnType<T>>;
+export type TheResponseOfRequestCore<T extends RequestCore<any, any>> =
+  NonNullable<T["response"]>;
+export type TheResponseOfFetchFunction<T extends FetchFunction> =
+  UnpackedRequestPayload<ReturnType<T>>;
 
 /**
  * 用于接口请求的核心类
  */
-export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<ReturnType<F>>> extends BaseDomain<
-  TheTypesOfEvents<any>
-> {
+export class RequestCore<
+  F extends FetchFunction,
+  P = UnpackedRequestPayload<ReturnType<F>>
+> extends BaseDomain<TheTypesOfEvents<any>> {
   debug = false;
 
   defaultResponse: P | null = null;
@@ -89,6 +93,10 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
   /** 处于请求中的 promise */
   // pending: Promise<UnpackedRequestPayload<ReturnType<F>>> | null = null;
   pending: Promise<Result<P>> | null = null;
+  pendingProcess: null | ProcessFunction<
+    Result<UnpackedRequestPayload<ReturnType<F>>>,
+    P
+  > = null;
   /** 调用 run 方法暂存的参数 */
   args: Parameters<F> = [] as any;
   /** 请求的响应 */
@@ -170,8 +178,11 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
     if (this.pending !== null) {
       const r = await this.pending;
       this.loading = false;
-      const data = r.data as P;
       this.pending = null;
+      const resp = this.pendingProcess ? this.pendingProcess(r as any) : r;
+      const data = resp.data as P;
+      console.log("[DOMAIN]request/index - return pending request");
+      this.pendingProcess = null;
       return Result.Ok(data);
     }
     // this.args = args;
@@ -186,10 +197,19 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
     this.emit(Events.BeforeRequest);
     let payloadProcess: null | ((v: any) => any) = null;
     const r2 = (() => {
-      const { hostname = "", url, method, query, body, headers, process } = this.service(...(args as unknown as any[]));
+      const {
+        hostname = "",
+        url,
+        method,
+        query,
+        body,
+        headers,
+        process,
+      } = this.service(...(args as unknown as any[]));
       // console.log('[DOMAIN]request/index - after = this.service()', headers);
       if (process) {
         payloadProcess = process;
+        this.pendingProcess = process;
       }
       if (method === "GET") {
         // const [query, extra = {}] = args;
@@ -215,14 +235,19 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
       return Result.Err(r2.error.message);
     }
     this.pending = r2.data;
-    const [r] = await Promise.all([this.pending, this.delay === null ? null : sleep(this.delay)]);
+    const [r] = await Promise.all([
+      this.pending,
+      this.delay === null ? null : sleep(this.delay),
+    ]);
     this.loading = false;
     const rr = (() => {
       if (payloadProcess) {
         return payloadProcess(r);
       }
+      this.pendingProcess = null;
       return r;
     })();
+    console.log("[DOMAIN]request/index - before this.process");
     const resp = this.process ? this.process(rr as any) : rr;
     this.emit(Events.LoadingChange, false);
     this.emit(Events.StateChange, { ...this.state });
@@ -271,13 +296,19 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
     this.emit(Events.ResponseChange, this.response);
   }
 
-  onLoadingChange(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.LoadingChange]>) {
+  onLoadingChange(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.LoadingChange]>
+  ) {
     return this.on(Events.LoadingChange, handler);
   }
-  beforeRequest(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.BeforeRequest]>) {
+  beforeRequest(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.BeforeRequest]>
+  ) {
     return this.on(Events.BeforeRequest, handler);
   }
-  onSuccess(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Success]>) {
+  onSuccess(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Success]>
+  ) {
     return this.on(Events.Success, handler);
   }
   onFailed(
@@ -292,20 +323,30 @@ export class RequestCore<F extends FetchFunction, P = UnpackedRequestPayload<Ret
     }
     return this.on(Events.Failed, handler);
   }
-  onCanceled(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Canceled]>) {
+  onCanceled(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Canceled]>
+  ) {
     return this.on(Events.Canceled, handler);
   }
   /** 建议使用 onFailed */
-  onError(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Failed]>) {
+  onError(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Failed]>
+  ) {
     return this.on(Events.Failed, handler);
   }
-  onCompleted(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Completed]>) {
+  onCompleted(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.Completed]>
+  ) {
     return this.on(Events.Completed, handler);
   }
-  onStateChange(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.StateChange]>) {
+  onStateChange(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.StateChange]>
+  ) {
     return this.on(Events.StateChange, handler);
   }
-  onResponseChange(handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.ResponseChange]>) {
+  onResponseChange(
+    handler: Handler<TheTypesOfEvents<UnpackedResult<P>>[Events.ResponseChange]>
+  ) {
     return this.on(Events.ResponseChange, handler);
   }
 }

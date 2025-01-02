@@ -13,7 +13,7 @@ import { Select } from "./ui/select";
 export function SectionForm(props: {
   store: FormCore<{
     title: FormFieldCore<InputCore<string>>;
-    num: FormFieldCore<InputCore<number>>;
+    num: FormFieldCore<SliderCore>;
     gutter: FormFieldCore<SliderCore>;
     width: FormFieldCore<SliderCore>;
     enableWidth: FormFieldCore<SwitchCore>;
@@ -44,7 +44,7 @@ export function SectionForm(props: {
       <div className={fieldCx}>
         <label className={labelCx}>{store.fields.num.label}</label>
         <div className={inputCx}>
-          <Input store={store.fields.num.$input} />
+          <Slider store={store.fields.num.$input} />
         </div>
       </div>
       <div className={fieldCx}>

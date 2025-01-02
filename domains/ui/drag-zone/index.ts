@@ -3,10 +3,12 @@ import { generate_unique_id } from "@/utils";
 import { base64ToFile } from "@/utils/browser";
 
 enum Events {
+  Error,
   StateChange,
   Change,
 }
 type TheTypesOfEvents = {
+  [Events.Error]: Error;
   [Events.Change]: File[];
   [Events.StateChange]: DragZoneState;
 };
@@ -92,14 +94,29 @@ export class DragZoneCore extends BaseDomain<TheTypesOfEvents> {
     return this._files.find((f) => f.name === name);
   }
   setValue(v: string) {
+    console.log("[DOMAIN]ui/form/drag-zone", v);
     if (v.startsWith("data:")) {
       if (this._fill) {
         this._files = [base64ToFile(v, generate_unique_id())];
         this._selected = true;
       }
     }
+    this.emit(Events.Change, [...this.files]);
+    this.emit(Events.StateChange, { ...this.state });
+  }
+  setError(err: Error) {
+    this.emit(Events.Error, err);
+  }
+  clear() {
+    this._files = [];
+    this._selected = false;
+    this.emit(Events.Change, [...this.files]);
+    this.emit(Events.StateChange, { ...this.state });
   }
 
+  onError(handler: Handler<TheTypesOfEvents[Events.Error]>) {
+    return this.on(Events.Error, handler);
+  }
   onChange(handler: Handler<TheTypesOfEvents[Events.Change]>) {
     return this.on(Events.Change, handler);
   }

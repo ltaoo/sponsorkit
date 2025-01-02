@@ -99,6 +99,17 @@ body {
   font-weight: var(--base-text-weight-semibold, 600) !important;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
 .__a {
   animation: __a 0.1s;
 }

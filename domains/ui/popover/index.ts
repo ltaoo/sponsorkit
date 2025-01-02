@@ -6,8 +6,8 @@ import { PresenceCore } from "@/domains/ui/presence";
 import { PopperCore, Align, Side } from "@/domains/ui/popper";
 import { DismissableLayerCore } from "@/domains/ui/dismissable-layer";
 
-const SIDE_OPTIONS = ["top", "right", "bottom", "left"] as const;
-const ALIGN_OPTIONS = ["start", "center", "end"] as const;
+// const SIDE_OPTIONS = ["top", "right", "bottom", "left"] as const;
+// const ALIGN_OPTIONS = ["start", "center", "end"] as const;
 // export type Align = (typeof ALIGN_OPTIONS)[number];
 // export type Side = (typeof SIDE_OPTIONS)[number];
 
@@ -33,7 +33,7 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
   _side: Side;
   _align: Align;
 
-  constructor(props: { _name?: string } & PopoverProps = {}) {
+  constructor(props: { unique_id?: string } & PopoverProps = {}) {
     super();
 
     const { side = "bottom", align = "end", strategy } = props;
@@ -83,7 +83,16 @@ export class PopoverCore extends BaseDomain<TheTypesOfEvents> {
     if (position) {
       this.popper.updateReference({
         getRect() {
-          const { x = 0, y = 0, width = 0, height = 0, left = 0, top = 0, right = 0, bottom = 0 } = position;
+          const {
+            x = 0,
+            y = 0,
+            width = 0,
+            height = 0,
+            left = 0,
+            top = 0,
+            right = 0,
+            bottom = 0,
+          } = position;
           return {
             width,
             height,

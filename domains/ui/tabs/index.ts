@@ -35,8 +35,8 @@ export class TabsCore extends BaseDomain<TheTypesOfEvents> {
     dir: "ltr",
   };
 
-  constructor(options: Partial<{ _name: string }> = {}) {
-    super(options);
+  constructor(props: Partial<{ unique_id: string }> = {}) {
+    super(props);
 
     this.roving = new RovingFocusCore();
   }
@@ -53,7 +53,11 @@ export class TabsCore extends BaseDomain<TheTypesOfEvents> {
     this.prevContent = matchedContent;
     this.emit(Events.ValueChange, value);
   }
-  appendContent(content: { id: number; value: string; presence: PresenceCore }) {
+  appendContent(content: {
+    id: number;
+    value: string;
+    presence: PresenceCore;
+  }) {
     if (this.contents.includes(content)) {
       return;
     }

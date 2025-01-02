@@ -39,14 +39,19 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
 
   constructor(
     props: {
-      _name?: string;
+      unique_id?: string;
     } & DropdownMenuProps = {}
   ) {
     super(props);
 
-    const { _name, side, align, items = [], onHidden } = props;
+    const { unique_id, side, align, items = [], onHidden } = props;
     this.items = items;
-    this.menu = new MenuCore({ side, align, items, _name: _name ? `${_name}__menu` : "menu-in-dropdown" });
+    this.menu = new MenuCore({
+      side,
+      align,
+      items,
+      unique_id: unique_id ? `${unique_id}__menu` : "menu-in-dropdown",
+    });
     this.menu.onHide(() => {
       this.menu.reset();
       if (onHidden) {
@@ -57,7 +62,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
 
   listenItems(items: MenuItemCore[]) {
     for (let i = 0; i < items.length; i += 1) {
-      const item = items[i];
+      // const item = items[i];
       // console.log(item);
       // item.onEnter(() => {
       //   this.maybeLeave = false;
@@ -120,15 +125,18 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
   }
   toggle(position?: Partial<{ x: number; y: number }>) {
     if (position) {
-      const { x, y } = position;
+      const { x = 0, y = 0 } = position;
       this.menu.popper.updateReference({
-        // @ts-ignore
         getRect() {
           return {
             width: 8,
             height: 8,
             x,
             y,
+            left: 0,
+            right: 0,
+            top: 0,
+            bottom: 0,
           };
         },
       });
@@ -136,7 +144,7 @@ export class DropdownMenuCore extends BaseDomain<TheTypesOfEvents> {
     this.menu.toggle();
   }
   hide() {
-    console.log('[DOMAIN/ui]dropdown-menu/index - hide');
+    console.log("[DOMAIN/ui]dropdown-menu/index - hide");
     this.menu.hide();
   }
   unmount() {

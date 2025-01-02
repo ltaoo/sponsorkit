@@ -11,30 +11,62 @@ function to_fixed(v: string | number) {
 export enum CoverLayerTypes {
   Whole,
   Section,
-  QRCodeSection,
+  // QRCodeSection,
   Title,
   Sponsor,
-  QRCode,
+  // QRCode,
   Padding,
   Margin,
   Gutter,
 }
-export type CoverLayer = {
-  id: number;
-  x: number;
-  y: number;
-  type: CoverLayerTypes;
-  width: number;
-  height: number;
-  payload: unknown;
+type SponsorNode = {
+  text: string;
+  image: string;
+  href: string;
 };
+type TitleNode = {
+  title: string;
+};
+type SectionNode = {} & Pick<
+  SectionPayload,
+  | "num_per_line"
+  | "max_width"
+  | "title"
+  | "gutter"
+  | "shape"
+  | "show_text"
+  | "list"
+>;
+type BaseCoverLayer<U> = {
+  [SubType in keyof U]: {
+    id: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    type: SubType;
+    payload: U[SubType];
+  };
+}[keyof U];
+export type CoverLayer = BaseCoverLayer<{
+  [CoverLayerTypes.Whole]: Record<string, string>;
+  [CoverLayerTypes.Gutter]: Record<string, string>;
+  [CoverLayerTypes.Margin]: Record<string, string>;
+  [CoverLayerTypes.Padding]: Record<string, string>;
+  [CoverLayerTypes.Section]: SectionNode;
+  // [CoverLayerTypes.QRCodeSection]: SectionNode;
+  [CoverLayerTypes.Title]: TitleNode;
+  [CoverLayerTypes.Sponsor]: SponsorNode;
+  // [CoverLayerTypes.QRCode]: SponsorNode;
+}>;
 export type CardInSection = {
   text: string;
   image: string;
   href: string;
 };
-export type ImageShape = "rounded" | "circle";
+export type CardImageShape = "rounded" | "circle";
 export type SectionPayload = {
+  // id: string;
   /** 该 section 标题 */
   title: string;
   /** sponsor 容器的内边距 暂时废弃 */
@@ -50,15 +82,18 @@ export type SectionPayload = {
   /** 该 section 最大宽度 */
   max_width?: number;
   /** sponsor 形状 */
-  shape: ImageShape;
+  shape: CardImageShape;
   /** 该 section 从垂直线 y 位置处开始绘制  */
   initial_y?: number;
   /** 用于覆盖 node @todo 这个设计不好看怎么优化 */
   override?: { type: CoverLayerTypes };
 };
-const WECHAT_AVATAR =
+export type CanvasPayload = {
+  sections: SectionPayload[];
+};
+export const WECHAT_AVATAR =
   "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCmFyaWEtbGFiZWw9IldlQ2hhdCIgcm9sZT0iaW1nIgp2aWV3Qm94PSIwIDAgNTEyIDUxMiIKZmlsbD0iI2ZmZiI+PHBhdGgKZD0ibTAgMEg1MTJWNTEySDAiCmZpbGw9IiMwMGM3MGEiLz48cGF0aCBkPSJNNDAyIDM2OWMyMy0xNyAzOC00MiAzOC03MCAwLTUxLTUwLTkyLTExMS05MnMtMTEwIDQxLTExMCA5MiA0OSA5MiAxMTAgOTJjMTMgMCAyNS0yIDM2LTUgNC0xIDggMCA5IDFsMjUgMTRjMyAyIDYgMCA1LTRsLTYtMjJjMC0zIDItNSA0LTZtLTExMC04NWExNSAxNSAwIDExMC0yOSAxNSAxNSAwIDAxMCAyOW03NCAwYTE1IDE1IDAgMTEwLTI5IDE1IDE1IDAgMDEwIDI5Ii8+PHBhdGggZD0iTTI1MCAxOThhMTggMTggMCAwMDAtMzUgMTggMTggMCAxMDAgMzVtLTg5IDBhMTggMTggMCAwMDAtMzUgMTggMTggMCAxMDAgMzVtNDQtOTNjNjYgMCAxMjEgNDEgMTMxIDkzLTY0LTQtMTQ3IDQ0LTEyMyAxMjgtMyAwLTI1IDItNTEtNi00LTEtOCAwLTExIDJsLTMwIDE3Yy0zIDEtNy0xLTYtNmw3LTI0YzEtNS0xLTgtNC0xMC0yOC0yMC00NS01MC00NS04MyAwLTYxIDU5LTExMSAxMzItMTExIi8+PC9zdmc+";
-const ALIPAY_AVATAR =
+export const ALIPAY_AVATAR =
   "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNzM1NzM0NTIwOTY2IiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE0MzEiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTEwMjQuMDUxMiA3MDEuMDMwNFYxOTYuODY0QTE5Ni45NjY0IDE5Ni45NjY0IDAgMCAwIDgyNy4xMzYgMEgxOTYuODY0QTE5Ni45NjY0IDE5Ni45NjY0IDAgMCAwIDAgMTk2Ljg2NHY2MzAuMjcyQTE5Ni45MTUyIDE5Ni45MTUyIDAgMCAwIDE5Ni44NjQgMTAyNGg2MzAuMjcyYTE5Ny4xMiAxOTcuMTIgMCAwIDAgMTkzLjg0MzItMTYyLjA5OTJjLTUyLjIyNC0yMi42MzA0LTI3OC41MjgtMTIwLjMyLTM5Ni40NDE2LTE3Ni42NC04OS43MDI0IDEwOC42OTc2LTE4My43MDU2IDE3My45MjY0LTMyNS4zMjQ4IDE3My45MjY0cy0yMzYuMTg1Ni04Ny4yNDQ4LTIyNC44MTkyLTE5NC4wNDhjNy40NzUyLTcwLjA0MTYgNTUuNTUyLTE4NC41NzYgMjY0LjI5NDQtMTY0Ljk2NjQgMTEwLjA4IDEwLjM0MjQgMTYwLjQwOTYgMzAuODczNiAyNTAuMTYzMiA2MC41MTg0IDIzLjE5MzYtNDIuNTk4NCA0Mi40OTYtODkuNDQ2NCA1Ny4xMzkyLTEzOS4yNjRIMjQ4LjA2NHYtMzkuNDI0aDE5Ni45MTUyVjMxMS4xNDI0SDIwNC44VjI2Ny43NzZoMjQwLjEyOFYxNjUuNjMyczIuMTUwNC0xNS45NzQ0IDE5LjgxNDQtMTUuOTc0NGg5OC40NTc2VjI2Ny43NzZoMjU2djQzLjQxNzZoLTI1NlYzODEuOTUyaDIwOC44NDQ4YTgwNS45OTA0IDgwNS45OTA0IDAgMCAxLTg0LjgzODQgMjEyLjY4NDhjNjAuNjcyIDIyLjAxNiAzMzYuNzkzNiAxMDYuMzkzNiAzMzYuNzkzNiAxMDYuMzkzNnpNMjgzLjU0NTYgNzkxLjYwMzJjLTE0OS42NTc2IDAtMTczLjMxMi05NC40NjQtMTY1LjM3Ni0xMzMuOTM5MiA3LjgzMzYtMzkuMzIxNiA1MS4yLTkwLjYyNCAxMzQuNC05MC42MjQgOTUuNTkwNCAwIDE4MS4yNDggMjQuNDczNiAyODQuMDU3NiA3NC41NDcyLTcyLjE5MiA5NC4wMDMyLTE2MC45MjE2IDE1MC4wMTYtMjUzLjA4MTYgMTUwLjAxNnoiIGZpbGw9IiMwMDlGRTgiIHAtaWQ9IjE0MzIiPjwvcGF0aD48L3N2Zz4=";
 
 export function SponsorCanvas(props: { width: number; padding: number }) {
@@ -66,13 +101,16 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
 
   let _width = width;
 
-  const _point = { x: 0, y: 0 };
   let uid = 1;
-  let uid2 = 1;
 
-  function move_to(x: number, y: number) {
-    _point.x = x;
-    _point.y = y;
+  function exchange(url: string) {
+    if (url === "wechat") {
+      return WECHAT_AVATAR;
+    }
+    if (url === "alipay") {
+      return ALIPAY_AVATAR;
+    }
+    return url;
   }
 
   return {
@@ -81,7 +119,7 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
     setWidth(w: number) {
       _width = w;
     },
-    renderSection(payload: SectionPayload) {
+    drawSection(payload: SectionPayload, index: number) {
       const {
         title,
         gutter,
@@ -91,41 +129,40 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
         list,
         initial_y = global_padding,
         shape,
-        override,
       } = payload;
-      console.log(
-        "[PAGE]renderSection",
-        payload,
-        { initial_y },
-        { title, override }
-      );
-
+      const _point = { x: 0, y: 0 };
+      function move_to(x: number, y: number) {
+        _point.x = x;
+        _point.y = y;
+      }
+      let _node_uid = 1;
       /** 每个元素的位置 用于交互 */
       const nodes: CoverLayer[] = [];
-
       move_to(_width / 2, initial_y);
       const title_height = 24;
       /** sponsor 名称与头像间的间距 */
       const text_margin_top_to_avatar = show_text ? 4 : 0;
       const text_height = show_text ? 18 : 0;
       /** 由于 text 是从基线开始绘制会导致 中文 渲染不完整 所以加一个 bottom pading */
+      const title_bottom_padding = 6;
       const text_bottom_padding = show_text ? 4 : 0;
       /** sponsors 和 section 标题的上边距 */
       const sponsors_margin_top_to_title = 8;
       _point.y += title_height;
+      // console.log("[BIZ]sponsors - draw section", title, _point);
       let result = `<text x="${_point.x}" y="${_point.y}" text-anchor="middle" class="sponsorkit-tier-title">${title}</text>`;
-      uid2 += 1;
+      _node_uid += 1;
       nodes.push({
-        id: uid2,
+        id: `${index}_title_${_node_uid}`,
         type: CoverLayerTypes.Title,
         x: global_padding,
         /** text 的 y 是文字的基线 所以 text 的 y 要减去其高度 */
         y: _point.y - title_height,
         width: _width - global_padding * 2,
-        height: title_height,
-        payload: null,
+        height: title_height + title_bottom_padding,
+        payload: payload,
       });
-      _point.y += title_height;
+      _point.y += title_height + title_bottom_padding;
       const image_size = (() => {
         const w = max_width || _width - global_padding * 2;
         return to_fixed((w - (num_per_line - 1) * gutter) / num_per_line);
@@ -162,15 +199,8 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
         }
         for (let i = 0; i < list.length; i += 1) {
           const { text, image: tmp, href = "#" } = list[i];
-          const image = (() => {
-            if (tmp === "wechat") {
-              return WECHAT_AVATAR;
-            }
-            if (tmp === "alipay") {
-              return ALIPAY_AVATAR;
-            }
-            return tmp;
-          })();
+          // console.log("[BIZ]sponsors - draw sponsor", text);
+          const image = exchange(tmp);
           const image_point = {
             x: _point.x - image_size / 2,
             y: _point.y,
@@ -179,10 +209,16 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
             x: _point.x,
             y: _point.y + image_size + text_margin_top_to_avatar + text_height,
           };
-          uid2 += 1;
+          // console.log(
+          //   "[BIZ]sponsors - draw sponsor",
+          //   _point,
+          //   text_point,
+          //   image_size
+          // );
+          _node_uid += 1;
           nodes.push({
-            id: uid2,
-            type: override ? override.type : CoverLayerTypes.Sponsor,
+            id: `${index}_card_${_node_uid}`,
+            type: CoverLayerTypes.Sponsor,
             x: image_point.x,
             y: image_point.y,
             width: image_size,
@@ -218,18 +254,15 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
         }
       }
       // console.log("[PAGE]before push Section node", _point.y, initial_y);
-      uid2 += 1;
+      _node_uid += 1;
       nodes.push({
-        id: uid2,
-        type:
-          override && override.type === CoverLayerTypes.QRCode
-            ? CoverLayerTypes.QRCodeSection
-            : CoverLayerTypes.Section,
+        id: `${index}_section_${_node_uid}`,
+        type: CoverLayerTypes.Section,
         x: 0,
         y: initial_y,
         width: _width,
         height: to_fixed(_point.y + text_bottom_padding - initial_y),
-        payload: null,
+        payload: payload,
       });
       return {
         content: result,
@@ -237,29 +270,15 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
         height: to_fixed(_point.y + text_bottom_padding),
         y: _point.y + text_bottom_padding + global_padding,
       };
-
-      // <a href="https://github.com/qq2952151753" className="sponsorkit-link" target="_blank" id="qq2952151753">
-      //   <text x="200" y="168" text-anchor="middle" className="sponsorkit-name" fill="currentColor">qq2952151753</text>
-      //   <clipPath id="c147">
-      //     <rect x="175" y="100" width={avatar_size} height={avatar_size} rx="25" ry="25" />
-      //   </clipPath>
-      //   <image x="175" y="100" width={avatar_size} height={avatar_size} href="data:image/png;base64,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" clip-path="url(#c147)"/>
-      // </a>
-      // <a href="#" className="sponsorkit-link" target="_blank" id="书杰">
-      //   <text x="280" y="168" text-anchor="middle" className="sponsorkit-name" fill="currentColor">书杰</text>
-      //   <clipPath id="c146">
-      //     <rect x="255" y="100" width="50" height="50" rx="25" ry="25" />
-      //   </clipPath>
-      //   <image x="255" y="100" width="50" height="50" href="${WECHAT_AVATAR}" clip-path="url(#c146)"/>
-      // </a>
     },
-    load(payload: { sections: SectionPayload[] }) {
+    load(payload: CanvasPayload) {
       let height = 0;
       let svg = "";
       const nodes: CoverLayer[] = [];
       let prev_y = undefined;
       for (let i = 0; i < payload.sections.length; i += 1) {
         const {
+          // id,
           title,
           num_per_line,
           max_width,
@@ -269,31 +288,40 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
           override,
           shape,
         } = payload.sections[i];
-        const r = this.renderSection({
-          title,
-          num_per_line,
-          max_width,
-          gutter,
-          show_text,
-          list,
-          shape,
-          override,
-          initial_y: prev_y,
-        });
+        // console.log(
+        //   "[BIZ]sponsors - load draw section",
+        //   title,
+        //   num_per_line,
+        //   gutter
+        // );
+        const r = this.drawSection(
+          {
+            // id,
+            title,
+            num_per_line,
+            max_width,
+            gutter,
+            show_text,
+            shape,
+            override,
+            initial_y: prev_y,
+            list,
+          },
+          i
+        );
         prev_y = r.y;
         svg += r.content;
         nodes.push(...r.nodes);
         height = r.height + global_padding;
       }
-      uid2 += 1;
       nodes.push({
-        id: uid2,
+        id: "whole",
         type: CoverLayerTypes.Whole,
         x: 0,
         y: 0,
         width: _width,
         height,
-        payload: null,
+        payload: {},
       });
       const state = {
         content: this.buildContent({ width: _width, height, content: svg }),
@@ -329,5 +357,6 @@ export function SponsorCanvas(props: { width: number; padding: number }) {
         </svg>`;
       return content;
     },
+    exchange,
   };
 }

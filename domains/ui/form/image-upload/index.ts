@@ -68,6 +68,9 @@ export function ImageUploadCore(props: ImageUploadPropsCore) {
     },
     setValue(url: string) {
       _url = url;
+      $zone.setValue(url);
+      $img.setLoaded();
+      $img.setURL(_url);
       bus.emit(Events.Change, _url);
     },
     onChange(handler: Handler<TheTypesOfEvents[Events.Change]>) {

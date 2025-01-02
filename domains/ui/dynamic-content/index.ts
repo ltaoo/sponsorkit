@@ -8,7 +8,7 @@ type TheTypesOfEvents = {
 };
 
 type DynamicContentCoreProps = {
-  unique_id?: unknown;
+  unique_uid?: unknown;
   defaultValue?: number;
   value: number;
 };
@@ -26,13 +26,13 @@ export class DynamicContentCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  constructor(props: Partial<{ _name: string }> & DynamicContentCoreProps) {
+  constructor(props: Partial<{ unique_id: string }> & DynamicContentCoreProps) {
     super(props);
 
-    const { value, unique_id } = props;
+    const { value, unique_uid } = props;
     this.value = value;
-    if (unique_id) {
-      this.unique_uid = unique_id;
+    if (unique_uid) {
+      this.unique_uid = unique_uid;
     }
   }
 
@@ -53,7 +53,7 @@ export class DynamicContentInListCore extends BaseDomain<TheTypesOfEvents> {
   cur: DynamicContentCore | null = null;
   defaultValue: number;
 
-  constructor(props: Partial<{ _name: string }> & { value: number }) {
+  constructor(props: Partial<{ unique_id: string }> & { value: number }) {
     super(props);
 
     const { value } = props;
@@ -69,7 +69,7 @@ export class DynamicContentInListCore extends BaseDomain<TheTypesOfEvents> {
       return existing;
     }
     const btn = new DynamicContentCore({
-      unique_id,
+      unique_uid: unique_id,
       value: this.defaultValue,
     });
     this.btns.push(btn);

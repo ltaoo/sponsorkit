@@ -21,19 +21,19 @@ type TheTypesOfEvents = {
   [Events.TmpHidden]: void;
   [Events.Unmounted]: void;
 };
-const PresenceEventMap = {
-  mounted: {
-    UNMOUNT: "unmounted",
-    ANIMATION_OUT: "unmountSuspended",
-  },
-  unmountSuspended: {
-    MOUNT: "mounted",
-    ANIMATION_END: "unmounted",
-  },
-  unmounted: {
-    MOUNT: "mounted",
-  },
-};
+// const PresenceEventMap = {
+//   mounted: {
+//     UNMOUNT: "unmounted",
+//     ANIMATION_OUT: "unmountSuspended",
+//   },
+//   unmountSuspended: {
+//     MOUNT: "mounted",
+//     ANIMATION_END: "unmounted",
+//   },
+//   unmounted: {
+//     MOUNT: "mounted",
+//   },
+// };
 type PresenceState = {
   mounted: boolean;
   enter: boolean;
@@ -78,7 +78,7 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  constructor(props: Partial<{ _name: string }> & PresenceProps = {}) {
+  constructor(props: Partial<{ unique_id: string }> & PresenceProps = {}) {
     super(props);
 
     const { mounted = false, visible = false } = props;
@@ -105,7 +105,12 @@ export class PresenceCore extends BaseDomain<TheTypesOfEvents> {
       this.emit(Events.Show);
     }, 120);
   }
-  hide(options: Partial<{ reason: "show_sibling" | "back" | "forward"; destroy: boolean }> = {}) {
+  hide(
+    options: Partial<{
+      reason: "show_sibling" | "back" | "forward";
+      destroy: boolean;
+    }> = {}
+  ) {
     // console.log("[DOMAIN]ui/presence - hide", options);
     const { destroy = true } = options;
     if (destroy === false) {

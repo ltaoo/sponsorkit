@@ -42,7 +42,7 @@ export function textToURL(text: string, type: string) {
   const dataURL = `data:${type};base64,${base64SVG}`;
   return dataURL;
 }
-export function textToFile(text: string, type: string) {
+export function textToFileURL(text: string, type: string) {
   const blob = new Blob([text], { type: `${type};charset=utf-8` });
   return URL.createObjectURL(blob);
 }
@@ -61,4 +61,17 @@ export function readFileAsArrayBuffer(
     };
     reader.readAsArrayBuffer(file);
   });
+}
+
+export function base64ToFile(base64: string, filename: string) {
+  const mimeType = base64.match(/^data:(.*);base64,/)![1];
+  const base64Data = base64.replace(/^data:(.*);base64,/, "");
+  const byteCharacters = atob(base64Data);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: mimeType });
+  return new File([blob], filename, { type: mimeType });
 }

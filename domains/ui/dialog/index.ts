@@ -37,6 +37,7 @@ type DialogState = {
   footer?: boolean;
   /** 能否手动关闭 */
   closeable?: boolean;
+  cancel?: boolean;
 };
 export type DialogProps = {
   title?: string;
@@ -53,7 +54,7 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
   footer: boolean = true;
   closeable: boolean = true;
 
-  present = new PresenceCore();
+  $present = new PresenceCore();
   okBtn = new ButtonCore();
   cancelBtn = new ButtonCore();
 
@@ -63,13 +64,21 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
       title: this.title,
       footer: this.footer,
       closeable: this.closeable,
+      cancel: !!this.cancelBtn,
     };
   }
 
-  constructor(options: Partial<{ _name: string }> & DialogProps = {}) {
-    super(options);
+  constructor(props: Partial<{ unique_id: string }> & DialogProps = {}) {
+    super(props);
 
-    const { title, footer = true, closeable = true, onOk, onCancel, onUnmounted } = options;
+    const {
+      title,
+      footer = true,
+      closeable = true,
+      onOk,
+      onCancel,
+      onUnmounted,
+    } = props;
     if (title) {
       this.title = title;
     }
@@ -84,18 +93,18 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
     if (onUnmounted) {
       this.onUnmounted(onUnmounted);
     }
-    this.present.onShow(async () => {
+    this.$present.onShow(async () => {
       this.open = true;
       this.emit(Events.VisibleChange, true);
       this.emit(Events.StateChange, { ...this.state });
     });
-    this.present.onHidden(async () => {
+    this.$present.onHidden(async () => {
       this.open = false;
       this.emit(Events.Cancel);
       this.emit(Events.VisibleChange, false);
       this.emit(Events.StateChange, { ...this.state });
     });
-    this.present.onUnmounted(() => {
+    this.$present.onUnmounted(() => {
       this.emit(Events.Unmounted);
     });
     this.okBtn.onClick(() => {
@@ -111,7 +120,7 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     // this.emit(Events.BeforeShow);
-    this.present.show();
+    this.$present.show();
   }
   /** 隐藏弹窗 */
   hide() {
@@ -119,7 +128,7 @@ export class DialogCore extends BaseDomain<TheTypesOfEvents> {
       return;
     }
     // this.emit(Events.Cancel);
-    this.present.hide();
+    this.$present.hide();
   }
   ok() {
     this.emit(Events.OK);

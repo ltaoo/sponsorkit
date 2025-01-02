@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-empty-object-type */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @file 多字段 Input
  */
@@ -15,17 +17,17 @@ type FormProps<F extends Record<string, FormFieldCore<any>>> = {
 // };
 
 export function FormCore<
-  F extends Record<string, FormFieldCore<{ label: string; name: string; input: ValueInputInterface<any> }>> = {}
+  F extends Record<string, FormFieldCore<ValueInputInterface<any>>> = {}
 >(props: FormProps<F>) {
   const { fields } = props;
 
   type Value<
-    O extends Record<string, FormFieldCore<{ label: string; name: string; input: ValueInputInterface<any> }>>
+    O extends Record<string, FormFieldCore<ValueInputInterface<any>>>
   > = {
     [K in keyof O]: O[K]["$input"]["value"];
   };
 
-  let _fields: F = fields;
+  const _fields: F = fields;
   let _values = {} as Value<F>;
   let _inline = false;
 
@@ -55,7 +57,10 @@ export function FormCore<
   };
   const bus = base<TheTypesOfEvents<Value<F>>>();
 
-  function updateValuesSilence<K extends keyof Value<F>>(name: K, value: Value<F>[K]) {
+  function updateValuesSilence<K extends keyof Value<F>>(
+    name: K,
+    value: Value<F>[K]
+  ) {
     // console.log("[DOMAIN]ui/form/index - updateValues", name, value);
     _values[name] = value;
   }
@@ -70,7 +75,7 @@ export function FormCore<
     const field = _fields[keys[i]];
     updateValuesSilence(field.name, field.$input.value);
     field.$input.onChange((v: any) => {
-      console.log("[DOMAIN]ui/form/index - updateValues", field.name, v);
+      // console.log("[DOMAIN]ui/form/index - updateValues", field.name, v);
       updateValues(field.name, v);
     });
     field.onShow(() => {
@@ -94,9 +99,12 @@ export function FormCore<
     },
     setValue(v: Value<F>, extra: { silence?: boolean } = {}) {
       const keys = Object.keys(_fields);
+      // console.log("set value", v);
       for (let i = 0; i < keys.length; i += 1) {
         const field = _fields[keys[i]];
-        field.$input.setValue(v[keys[i]], { silence: true });
+        const vv = v[keys[i]];
+        // console.log(vv);
+        field.$input.setValue(vv);
       }
       _values = v;
       if (!extra.silence) {
@@ -124,12 +132,14 @@ export function FormCore<
     onChange(handler: Handler<TheTypesOfEvents<Value<F>>[Events.Change]>) {
       return bus.on(Events.Change, handler);
     },
-    onStateChange(handler: Handler<TheTypesOfEvents<Value<F>>[Events.StateChange]>) {
+    onStateChange(
+      handler: Handler<TheTypesOfEvents<Value<F>>[Events.StateChange]>
+    ) {
       return bus.on(Events.StateChange, handler);
     },
   };
 }
 
 export type FormCore<
-  F extends Record<string, FormFieldCore<{ label: string; name: string; input: ValueInputInterface<any> }>> = {}
+  F extends Record<string, FormFieldCore<ValueInputInterface<any>>> = {}
 > = ReturnType<typeof FormCore<F>>;

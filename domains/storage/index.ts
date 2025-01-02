@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { debounce } from "@/utils/lodash/debounce";
 
 import { BaseDomain, Handler } from "@/domains/base";
@@ -22,7 +23,9 @@ type StorageCoreState<T> = {
   values: T;
 };
 
-export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<TheTypesOfEvents<T>> {
+export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<
+  TheTypesOfEvents<T>
+> {
   key: string;
   values: T;
   defaultValues: T;
@@ -34,7 +37,7 @@ export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<T
     };
   }
 
-  constructor(props: Partial<{ _name: string }> & StorageCoreProps<T>) {
+  constructor(props: Partial<{ unique_id: string }> & StorageCoreProps<T>) {
     super(props);
 
     const { key, client, defaultValues, values } = props;
@@ -53,8 +56,7 @@ export class StorageCore<T extends Record<string, unknown>> extends BaseDomain<T
     // console.log("[DOMAIN]storage/index - get", key, v, this.values);
     if (v === undefined) {
       if (defaultValue) {
-        // @ts-ignore
-        return defaultValue[key] as T[K];
+        return (defaultValue as any)[key];
       }
       throw new Error("the default value no existing");
     }

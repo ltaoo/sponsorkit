@@ -1,5 +1,5 @@
 import { BaseDomain, Handler } from "@/domains/base";
-import { RefCore } from "@/domains/cur";
+import { RefCore } from "@/domains/ui/cur";
 
 enum Events {
   Click,
@@ -27,11 +27,11 @@ export class ButtonCore<T = unknown> extends BaseDomain<TheTypesOfEvents<T>> {
     disabled: false,
   };
 
-  constructor(options: Partial<{ _name: string } & ButtonProps<T>> = {}) {
-    super(options);
+  constructor(props: Partial<{ unique_id: string } & ButtonProps<T>> = {}) {
+    super(props);
 
     this.cur = new RefCore();
-    const { onClick } = options;
+    const { onClick } = props;
     if (onClick) {
       this.onClick(() => {
         onClick(this.cur.value);
@@ -95,10 +95,12 @@ export class ButtonInListCore<T> extends BaseDomain<TheTypesInListOfEvents<T>> {
   /** 按钮点击后，该值被设置为触发点击的那个按钮 */
   cur: ButtonCore<T> | null = null;
 
-  constructor(options: Partial<{ _name: string } & ButtonInListProps<T>> = {}) {
-    super(options);
+  constructor(
+    props: Partial<{ unique_id: string } & ButtonInListProps<T>> = {}
+  ) {
+    super(props);
 
-    const { onClick } = options;
+    const { onClick } = props;
     if (onClick) {
       this.onClick(onClick);
     }
@@ -147,7 +149,9 @@ export class ButtonInListCore<T> extends BaseDomain<TheTypesInListOfEvents<T>> {
   onClick(handler: Handler<TheTypesInListOfEvents<T>[Events.Click]>) {
     this.on(Events.Click, handler);
   }
-  onStateChange(handler: Handler<TheTypesInListOfEvents<T>[Events.StateChange]>) {
+  onStateChange(
+    handler: Handler<TheTypesInListOfEvents<T>[Events.StateChange]>
+  ) {
     this.on(Events.StateChange, handler);
   }
 }

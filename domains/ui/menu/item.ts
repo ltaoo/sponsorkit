@@ -76,10 +76,20 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  constructor(options: Partial<{ _name: string }> & MenuItemCoreProps) {
-    super(options);
+  constructor(props: Partial<{ unique_id: string }> & MenuItemCoreProps) {
+    super(props);
 
-    const { _name, tooltip, label, icon, shortcut, disabled = false, hidden = false, menu, onClick } = options;
+    const {
+      unique_id,
+      tooltip,
+      label,
+      icon,
+      shortcut,
+      disabled = false,
+      hidden = false,
+      menu,
+      onClick,
+    } = props;
 
     this.label = label;
     this.tooltip = tooltip;
@@ -87,8 +97,8 @@ export class MenuItemCore extends BaseDomain<TheTypesOfEvents> {
     this.shortcut = shortcut;
     this._hidden = hidden;
     this._disabled = disabled;
-    if (_name) {
-      this._name = _name;
+    if (unique_id) {
+      this._name = unique_id;
     }
 
     if (menu) {

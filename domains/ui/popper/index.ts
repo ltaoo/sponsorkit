@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BaseDomain, Handler } from "@/domains/base";
 import { Rect } from "@/types";
 
@@ -123,15 +124,23 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   _enter = false;
   _focus = false;
 
-  constructor(options: Partial<{ _name: string }> & Partial<PopperProps> = {}) {
+  constructor(
+    options: Partial<{ unique_id: string }> & Partial<PopperProps> = {}
+  ) {
     super(options);
 
-    const { _name, side = "bottom", align = "center", strategy = "absolute", middleware = [] } = options;
-    if (_name) {
-      this.unique_id = _name;
+    const {
+      unique_id,
+      side = "bottom",
+      align = "center",
+      strategy = "absolute",
+    } = options;
+    if (unique_id) {
+      this.unique_id = unique_id;
     }
     this.strategy = strategy;
-    this.placement = (side + (align !== "center" ? "-" + align : "")) as Placement;
+    this.placement = (side +
+      (align !== "center" ? "-" + align : "")) as Placement;
     // const validMiddleware = middleware.filter(Boolean) as Middleware[];
   }
 
@@ -192,7 +201,9 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     }
     const coords = await this.computePosition();
     const { x, y, middlewareData } = coords;
-    const [placedSide, placedAlign] = getSideAndAlignFromPlacement(this.placement);
+    const [placedSide, placedAlign] = getSideAndAlignFromPlacement(
+      this.placement
+    );
     this.state = {
       x,
       y,
@@ -210,7 +221,7 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
   async computePosition() {
     const rtl = true;
     const { placement, strategy } = this;
-    let statefulPlacement = placement;
+    const statefulPlacement = placement;
     // @todo 处理 this.reference 为空
     const reference = this.reference!.getRect();
     const floating = this.floating!.getRect();
@@ -259,7 +270,11 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
   /** 根据放置位置，计算浮动元素坐标 */
-  computeCoordsFromPlacement(elms: { reference: Rect; floating: Rect }, placement: Placement, rtl?: boolean): Coords {
+  computeCoordsFromPlacement(
+    elms: { reference: Rect; floating: Rect },
+    placement: Placement,
+    rtl?: boolean
+  ): Coords {
     const { reference, floating } = elms;
     console.log("computeCoordsFromPlacement", reference, floating);
     const commonX = reference.x + reference.width / 2 - floating.width / 2;
@@ -320,13 +335,19 @@ export class PopperCore extends BaseDomain<TheTypesOfEvents> {
     this._focus = false;
   }
 
-  onReferenceMounted(handler: Handler<TheTypesOfEvents[Events.ReferenceMounted]>) {
+  onReferenceMounted(
+    handler: Handler<TheTypesOfEvents[Events.ReferenceMounted]>
+  ) {
     return this.on(Events.ReferenceMounted, handler);
   }
-  onFloatingMounted(handler: Handler<TheTypesOfEvents[Events.FloatingMounted]>) {
+  onFloatingMounted(
+    handler: Handler<TheTypesOfEvents[Events.FloatingMounted]>
+  ) {
     return this.on(Events.FloatingMounted, handler);
   }
-  onContainerChange(handler: Handler<TheTypesOfEvents[Events.ContainerChange]>) {
+  onContainerChange(
+    handler: Handler<TheTypesOfEvents[Events.ContainerChange]>
+  ) {
     return this.on(Events.ContainerChange, handler);
   }
   onEnter(handler: Handler<TheTypesOfEvents[Events.Enter]>) {
@@ -389,7 +410,10 @@ function within(min: number, value: number, max: number): number {
  * appears centered to the reference element.
  * @see https://floating-ui.com/docs/arrow
  */
-export const arrow = (options: { element: { width: number; height: number }; padding?: number }): Middleware => ({
+export const arrow = (options: {
+  element: { width: number; height: number };
+  padding?: number;
+}): Middleware => ({
   name: "arrow",
   options,
   async fn(state) {
@@ -411,7 +435,11 @@ export const arrow = (options: { element: { width: number; height: number }; pad
     const maxProp = isYAxis ? "bottom" : "right";
     const clientProp = isYAxis ? "clientHeight" : "clientWidth";
 
-    const endDiff = rects.reference[length] + rects.reference[axis] - coords[axis] - rects.floating[length];
+    const endDiff =
+      rects.reference[length] +
+      rects.reference[axis] -
+      coords[axis] -
+      rects.floating[length];
     const startDiff = coords[axis] - rects.reference[axis];
 
     // const arrowOffsetParent = await platform.getOffsetParent?.(element);
@@ -424,7 +452,8 @@ export const arrow = (options: { element: { width: number; height: number }; pad
     // point is outside the floating element's bounds.
     const min = paddingObject[minProp];
     const max = clientSize - arrowDimensions[length] - paddingObject[maxProp];
-    const center = clientSize / 2 - arrowDimensions[length] / 2 + centerToReference;
+    const center =
+      clientSize / 2 - arrowDimensions[length] / 2 + centerToReference;
     const offset = within(min, center, max);
 
     // If the reference is small enough that the arrow's padding causes it to
@@ -438,7 +467,11 @@ export const arrow = (options: { element: { width: number; height: number }; pad
         (center < min ? paddingObject[minProp] : paddingObject[maxProp]) -
         arrowDimensions[length] / 2 <
         0;
-    const alignmentOffset = shouldAddOffset ? (center < min ? min - center : max - center) : 0;
+    const alignmentOffset = shouldAddOffset
+      ? center < min
+        ? min - center
+        : max - center
+      : 0;
 
     return {
       [axis]: coords[axis] - alignmentOffset,
@@ -475,7 +508,9 @@ const transformOriginMiddleware = (options: {
     const arrowHeight = isArrowHidden ? 0 : element.height;
 
     const [placedSide, placedAlign] = getSideAndAlignFromPlacement(placement);
-    const noArrowAlign = { start: "0%", center: "50%", end: "100%" }[placedAlign];
+    const noArrowAlign = { start: "0%", center: "50%", end: "100%" }[
+      placedAlign
+    ];
 
     const arrowXCenter = (middlewareData.arrow?.x ?? 0) + arrowWidth / 2;
     const arrowYCenter = (middlewareData.arrow?.y ?? 0) + arrowHeight / 2;

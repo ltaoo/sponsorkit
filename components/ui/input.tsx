@@ -5,11 +5,17 @@ import React, { ReactElement, useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, Loader2, X } from "lucide-react";
 
 import { useInitialize } from "@/hooks/index";
-import { InputCore } from "@/domains/ui/input";
-import { connect } from "@/domains/ui/input/connect.web";
+import { InputCore } from "@/domains/ui/form/input";
+import { connect } from "@/domains/ui/form/input/connect.web";
 import { cn } from "@/utils/index";
 
-const Input = (props: { store: InputCore; focus?: boolean; prefix?: ReactElement; className?: string }) => {
+const Input = (props: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  store: InputCore<any>;
+  focus?: boolean;
+  prefix?: ReactElement;
+  className?: string;
+}) => {
   const { store, prefix, focus } = props;
 
   const ref = useRef<HTMLInputElement>(null);
@@ -32,7 +38,17 @@ const Input = (props: { store: InputCore; focus?: boolean; prefix?: ReactElement
     });
   });
 
-  const { loading, value, placeholder, disabled, allowClear, autoComplete, autoFocus, type, tmpType } = state;
+  const {
+    loading,
+    value,
+    placeholder,
+    disabled,
+    allowClear,
+    autoComplete,
+    autoFocus,
+    type,
+    tmpType,
+  } = state;
 
   return (
     <div className="relative">
@@ -50,17 +66,21 @@ const Input = (props: { store: InputCore; focus?: boolean; prefix?: ReactElement
       <input
         ref={ref}
         className={cn(
-          "flex items-center h-10 w-full rounded-md leading-none border border-w-bg-2 bg-w-bg-3 text-w-fg-0 py-2 px-3 text-sm",
-          "focus:outline-none focus:ring-2 focus:ring-fg-4 focus:ring-offset-2",
-          "disabled:cursor-not-allowed disabled:opacity-50",
-          "placeholder:text-w-fg-1",
-          prefix ? "pl-10" : "",
+          "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
           props.className
         )}
+        // className={cn(
+        //   "flex items-center h-10 w-full rounded-md leading-none border border-w-bg-2 bg-w-bg-3 text-w-fg-0 py-2 px-3 text-sm",
+        //   "focus:outline-none focus:ring-2 focus:ring-fg-4 focus:ring-offset-2",
+        //   "disabled:cursor-not-allowed disabled:opacity-50",
+        //   "placeholder:text-w-fg-1",
+        //   prefix ? "pl-10" : "",
+        //   props.className
+        // )}
         style={{
           verticalAlign: "bottom",
         }}
-        value={value}
+        value={value as string | number | readonly string[] | undefined}
         placeholder={placeholder}
         disabled={disabled}
         type={tmpType || type}
@@ -70,7 +90,7 @@ const Input = (props: { store: InputCore; focus?: boolean; prefix?: ReactElement
         onChange={(event: React.ChangeEvent & { target: HTMLInputElement }) => {
           const { value: v } = event.target;
           // console.log("[COMPONENT]ui/input onchange", v);
-          store.change(v);
+          store.setValue(v);
         }}
         onKeyDown={(event: React.KeyboardEvent) => {
           if (event.key === "Enter") {

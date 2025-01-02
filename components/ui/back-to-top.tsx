@@ -1,8 +1,5 @@
-import { useRef, useState } from "react";
 import { ArrowUp } from "lucide-react";
 
-import { ScrollViewCore } from "@/domains/ui/scroll-view";
-import { useInitialize } from "@/hooks";
 import { cn } from "@/utils";
 
 export function BackToTop(props: { visible: boolean; onClick?: () => void }) {
@@ -26,7 +23,13 @@ export function BackToTop(props: { visible: boolean; onClick?: () => void }) {
   // });
 
   return (
-    <div className={cn("z-100 fixed right-4 bottom-28", visible ? "block" : "hidden")} style={{ zIndex: 100 }}>
+    <div
+      className={cn(
+        "z-100 fixed right-4 bottom-28",
+        visible ? "block" : "hidden"
+      )}
+      style={{ zIndex: 100 }}
+    >
       <div
         className="flex items-center justify-center w-[64px] h-[64px] rounded-full bg-w-bg-0 opacity-100"
         onClick={onClick}

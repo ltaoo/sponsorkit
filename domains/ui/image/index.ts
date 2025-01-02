@@ -75,10 +75,17 @@ export class ImageCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  constructor(props: Partial<{}> & ImageProps) {
+  constructor(props: ImageProps) {
     super();
 
-    const { unique_id, width = 200, height = 200, src, scale, fit = "cover" } = props;
+    const {
+      unique_id,
+      width = 200,
+      height = 200,
+      src,
+      scale,
+      fit = "cover",
+    } = props;
     this.width = width;
     this.height = height;
     this.src = "";
@@ -161,7 +168,7 @@ export class ImageInListCore extends BaseDomain<TheTypesOfEvents> {
 
   scale: number | null = null;
 
-  constructor(props: Partial<{ _name: string } & ImageCore> = {}) {
+  constructor(props: Partial<{ unique_id: string } & ImageCore> = {}) {
     super(props);
 
     const { scale } = props;

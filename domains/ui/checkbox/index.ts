@@ -40,7 +40,7 @@ export class CheckboxCore extends BaseDomain<TheTypesOfEvents> {
 
   prevChecked = false;
 
-  constructor(props: { _name?: string } & CheckboxProps = {}) {
+  constructor(props: { unique_id?: string } & CheckboxProps = {}) {
     super(props);
 
     const { label = "", disabled = false, checked = false, onChange } = props;

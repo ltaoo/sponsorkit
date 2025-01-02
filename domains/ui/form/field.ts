@@ -1,9 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseDomain, Handler } from "@/domains/base";
-import { InputCore } from "@/domains/ui/form/input";
-import { DatePickerCore } from "@/domains/ui/date-picker";
 
-import { ListContainerCore } from "./list";
-import { FormCore } from "./index";
 import { ValueInputInterface } from "./types";
 
 enum Events {
@@ -22,21 +19,36 @@ type FormFieldCoreState = {
   required: boolean;
   hidden: boolean;
 };
-// value: InputCore<any> | DatePickerCore | ListInputCore | FormCore<any>;
-// type FormFieldCoreProps = {
-//   label: string;
-//   name: string;
-//   value: ValueInputInterface<any>;
-// };
+type FormFieldCoreProps<T extends ValueInputInterface<any>> = {
+  label: string;
+  name: string;
+  help?: string;
+  required?: boolean;
+  input: T;
+};
 
+
+/**
+ * const $form = FormCore({
+ *   fields: {
+ *     title: new FormFieldCore({
+ *       label: "标题",
+ *       // 目前 name 必须和 fields key 相同
+ *       name: "title",
+ *       input: new InputCore({ defaultValue: "" }),
+ *     }),
+ *   }
+ * });
+ */
 export class FormFieldCore<
-  T extends { label: string; name: string; required?: boolean; input: ValueInputInterface<any> }
+  T extends ValueInputInterface<any>
 > extends BaseDomain<TheTypesOfEvents> {
   _label: string;
   _name: string;
   _required = false;
   _hidden = false;
-  $input: T["input"];
+  _help = "";
+  $input: T;
 
   get state(): FormFieldCoreState {
     return {
@@ -52,17 +64,21 @@ export class FormFieldCore<
   get name() {
     return this._name;
   }
+  get help() {
+    return this._help;
+  }
   // get $value() {
   //   return this.$value;
   // }
 
-  constructor(props: Partial<{ _name: string }> & T) {
+  constructor(props: Partial<{ unique_id: string }> & FormFieldCoreProps<T>) {
     super(props);
 
-    const { name, label, required = false, input } = props;
+    const { name, label, help = "", required = false, input } = props;
     this._name = name;
     this._label = label;
     this._required = required;
+    this._help = help;
     this.$input = input;
   }
 

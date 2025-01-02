@@ -8,95 +8,98 @@ import { Show } from "@/packages/ui/show";
 import { cn } from "@/utils/index";
 import { useInitialize } from "@/hooks";
 
-const sheetVariants = cva("fixed z-50 scale-100 gap-4 bg-w-bg-2 text-w-fg-0 opacity-100", {
-  variants: {
-    position: {
-      top: "w-full duration-300",
-      bottom: "w-full duration-300",
-      left: "h-full duration-300",
-      right: "h-full duration-300",
-      // top: "animate-in slide-in-from-top w-full duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top",
-      // bottom:
-      //   "animate-in slide-in-from-bottom w-full duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom",
-      // left: "animate-in slide-in-from-left h-full duration-300",
-      // right: "animate-in slide-in-from-right h-full duration-300",
+const sheetVariants = cva(
+  "fixed z-50 scale-100 gap-4 bg-w-bg-2 text-w-fg-0 opacity-100",
+  {
+    variants: {
+      position: {
+        top: "w-full duration-300",
+        bottom: "w-full duration-300",
+        left: "h-full duration-300",
+        right: "h-full duration-300",
+        // top: "animate-in slide-in-from-top w-full duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top",
+        // bottom:
+        //   "animate-in slide-in-from-bottom w-full duration-300 data-[state=closed]:animate-out data-[state=closed]:slide-out-to-bottom",
+        // left: "animate-in slide-in-from-left h-full duration-300",
+        // right: "animate-in slide-in-from-right h-full duration-300",
+      },
+      size: {
+        content: "",
+        default: "",
+        sm: "",
+        lg: "",
+        xl: "",
+        full: "",
+      },
     },
-    size: {
-      content: "",
-      default: "",
-      sm: "",
-      lg: "",
-      xl: "",
-      full: "",
-    },
-  },
-  compoundVariants: [
-    {
-      position: ["top", "bottom"],
-      size: "content",
-      class: "max-h-screen",
-    },
-    {
-      position: ["top", "bottom"],
+    compoundVariants: [
+      {
+        position: ["top", "bottom"],
+        size: "content",
+        class: "max-h-screen",
+      },
+      {
+        position: ["top", "bottom"],
+        size: "default",
+        class: "h-1/3",
+      },
+      {
+        position: ["top", "bottom"],
+        size: "sm",
+        class: "h-1/4",
+      },
+      {
+        position: ["top", "bottom"],
+        size: "lg",
+        class: "h-1/2",
+      },
+      {
+        position: ["top", "bottom"],
+        size: "xl",
+        class: "h-5/6",
+      },
+      {
+        position: ["top", "bottom"],
+        size: "full",
+        class: "h-screen",
+      },
+      {
+        position: ["right", "left"],
+        size: "content",
+        class: "max-w-screen",
+      },
+      {
+        position: ["right", "left"],
+        size: "default",
+        class: "w-1/3",
+      },
+      {
+        position: ["right", "left"],
+        size: "sm",
+        class: "w-1/4",
+      },
+      {
+        position: ["right", "left"],
+        size: "lg",
+        class: "w-1/2",
+      },
+      {
+        position: ["right", "left"],
+        size: "xl",
+        class: "w-5/6",
+      },
+      {
+        position: ["right", "left"],
+        size: "full",
+        class: "w-screen",
+      },
+    ],
+    defaultVariants: {
+      position: "right",
       size: "default",
-      class: "h-1/3",
     },
-    {
-      position: ["top", "bottom"],
-      size: "sm",
-      class: "h-1/4",
-    },
-    {
-      position: ["top", "bottom"],
-      size: "lg",
-      class: "h-1/2",
-    },
-    {
-      position: ["top", "bottom"],
-      size: "xl",
-      class: "h-5/6",
-    },
-    {
-      position: ["top", "bottom"],
-      size: "full",
-      class: "h-screen",
-    },
-    {
-      position: ["right", "left"],
-      size: "content",
-      class: "max-w-screen",
-    },
-    {
-      position: ["right", "left"],
-      size: "default",
-      class: "w-1/3",
-    },
-    {
-      position: ["right", "left"],
-      size: "sm",
-      class: "w-1/4",
-    },
-    {
-      position: ["right", "left"],
-      size: "lg",
-      class: "w-1/2",
-    },
-    {
-      position: ["right", "left"],
-      size: "xl",
-      class: "w-5/6",
-    },
-    {
-      position: ["right", "left"],
-      size: "full",
-      class: "w-screen",
-    },
-  ],
-  defaultVariants: {
-    position: "right",
-    size: "default",
-  },
-});
+  }
+);
 const portalVariants = cva("fixed inset-0 z-50 flex", {
   variants: {
     position: {
@@ -109,36 +112,45 @@ const portalVariants = cva("fixed inset-0 z-50 flex", {
   defaultVariants: { position: "right" },
 });
 
-export const Sheet = React.memo(
-  (
-    props: {
-      store: DialogCore;
-      size?: VariantProps<typeof sheetVariants>["size"];
-      hideTitle?: boolean;
-    } & Omit<React.AllHTMLAttributes<HTMLDivElement>, "size">
-  ) => {
-    const { store, size = "lg", hideTitle } = props;
-    return (
-      <Root store={store}>
-        <Content store={store} hideTitle={hideTitle} position="bottom" size={size}>
-          {props.children}
-        </Content>
-      </Root>
-    );
-  }
-);
+export const Sheet = (
+  props: {
+    store: DialogCore;
+    size?: VariantProps<typeof sheetVariants>["size"];
+    hideTitle?: boolean;
+  } & Omit<React.AllHTMLAttributes<HTMLDivElement>, "size">
+) => {
+  const { store, size = "lg", hideTitle } = props;
+  return (
+    <Root store={store}>
+      <Content
+        store={store}
+        hideTitle={hideTitle}
+        position="bottom"
+        size={size}
+      >
+        {props.children}
+      </Content>
+    </Root>
+  );
+};
 
 const Root = DialogPrimitive.Root;
 
-interface SheetPortalProps extends React.AllHTMLAttributes<HTMLDivElement>, VariantProps<typeof portalVariants> {}
+interface SheetPortalProps
+  extends React.AllHTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof portalVariants> {}
 
 const Portal = (props: { store: DialogCore } & SheetPortalProps) => (
   <DialogPrimitive.Portal store={props.store} className={cn(props.className)}>
-    <div className={portalVariants({ position: props.position })}>{props.children}</div>
+    <div className={portalVariants({ position: props.position })}>
+      {props.children}
+    </div>
   </DialogPrimitive.Portal>
 );
 
-const Overlay = (props: { store: DialogCore } & React.AllHTMLAttributes<HTMLDivElement>) => {
+const Overlay = (
+  props: { store: DialogCore } & React.AllHTMLAttributes<HTMLDivElement>
+) => {
   const { store } = props;
 
   const [state, setState] = useState(store.$present.state);
@@ -213,7 +225,10 @@ const Content = (
   );
 };
 
-const Header = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+const Header = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
       "flex flex-col h-14 rounded-tl-xl rounded-tr-xl bg-w-bg-2 border-b border-w-bg-3 text-center sm:text-left",

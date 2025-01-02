@@ -27,18 +27,18 @@ export class ContextMenuCore extends BaseDomain<TheTypeOfEvent> {
   };
 
   constructor(
-    options: Partial<
+    props: Partial<
       {
-        _name: string;
+        unique_id: string;
       } & ContextMenuProps
     >
   ) {
-    super(options);
-    const { _name, items = [] } = options;
+    super(props);
+    const { unique_id: _name, items = [] } = props;
     this.state.items = items;
     this.menu = new MenuCore({
-      ...options,
-      _name: _name ? `${_name}__menu` : "menu-in-context-menu",
+      ...props,
+      unique_id: _name ? `${_name}__menu` : "menu-in-context-menu",
       side: "right",
       align: "start",
     });

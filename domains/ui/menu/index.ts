@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @file 菜单 组件
  */
@@ -57,11 +58,11 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     items: [],
   };
 
-  constructor(options: Partial<{ _name: string } & MenuCoreProps> = {}) {
+  constructor(options: Partial<{ unique_id: string } & MenuCoreProps> = {}) {
     super(options);
-    const { _name, items = [], side, align, strategy } = options;
-    if (_name) {
-      this._name = _name;
+    const { unique_id, items = [], side, align, strategy } = options;
+    if (unique_id) {
+      this._name = unique_id;
     }
     this.state.items = items;
     this.items = items;
@@ -70,7 +71,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       side,
       align,
       strategy,
-      _name: _name ? `${_name}__popper` : "menu__popper",
+      unique_id: unique_id ? `${unique_id}__popper` : "menu__popper",
     });
     this.presence = new PresenceCore();
     this.layer = new DismissableLayerCore();
@@ -92,7 +93,10 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.hide();
     });
     this.presence.onHidden(() => {
-      console.log("[DOMAIN]ui/menu/index - presence.onHidden", this.cur_item?.label);
+      console.log(
+        "[DOMAIN]ui/menu/index - presence.onHidden",
+        this.cur_item?.label
+      );
       this.reset();
       if (this.cur_item) {
         this.cur_item.blur();
@@ -158,7 +162,12 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       // if (!item.menu && this.curSub) {
       //   this.curSub.hide();
       // }
-      console.log("[DOMAIN]ui/menu/index - item.onEnter", item.label, item.menu, this.cur_item?.label);
+      console.log(
+        "[DOMAIN]ui/menu/index - item.onEnter",
+        item.label,
+        item.menu,
+        this.cur_item?.label
+      );
       this.emit(Events.EnterItem, item);
       if (item.menu) {
         item.menu.show();
@@ -184,7 +193,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
       this.emit(Events.LeaveItem, item);
       item.blur();
       if (item.menu) {
-        let timer = setTimeout(() => {
+        const timer = setTimeout(() => {
           item.menu!.hide();
           // this.cur_item = null;
         }, 0);
@@ -212,7 +221,7 @@ export class MenuCore extends BaseDomain<TheTypesOfEvents> {
     if (!item.menu) {
       return;
     }
-    const sub_menu = item.menu;
+    // const sub_menu = item.menu;
     // sub_menu.onShow(() => {
     //   this.log("sub.onShow");
     //   this.cur_sub = sub_menu;

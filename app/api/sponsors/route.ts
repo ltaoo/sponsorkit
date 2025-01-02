@@ -16,6 +16,7 @@ const options = {
   updateAgeOnGet: false,
   updateAgeOnHas: false,
 };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const cache = new LRUCache(options);
 
 export async function GET() {

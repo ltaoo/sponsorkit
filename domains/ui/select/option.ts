@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /**
  * @file Select 选项
  */
@@ -62,10 +63,10 @@ export class SelectOptionCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     };
   }
 
-  constructor(options: Partial<{ _name: string }> & SelectItemProps<T>) {
-    super(options);
+  constructor(props: Partial<{ unique_id: string }> & SelectItemProps<T>) {
+    super(props);
 
-    const { name, label, value, $node, getRect, getStyles } = options;
+    const { name, label, value, $node, getRect, getStyles } = props;
     this.text = label;
     this.value = value;
     if (name) {
@@ -100,7 +101,7 @@ export class SelectOptionCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.text = text;
   }
   select() {
-    console.log("[DOMAIN]ui/select/index - select", this._selected);
+    // console.log("[DOMAIN]ui/select/index - select", this._selected);
     if (this._selected) {
       return;
     }
@@ -131,7 +132,11 @@ export class SelectOptionCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     this.emit(Events.StateChange, { ...this.state });
   }
   handlePointerEnter() {
-    console.log("[DOMAIN]ui/select/index - handlePointerEnter", this._enter, this._focused);
+    // console.log(
+    //   "[DOMAIN]ui/select/index - handlePointerEnter",
+    //   this._enter,
+    //   this._focused
+    // );
     if (this._enter === true) {
       return;
     }

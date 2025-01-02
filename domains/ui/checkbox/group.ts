@@ -36,7 +36,7 @@ type CheckboxGroupState<T> = Omit<CheckboxGroupProps<T>, "options"> & {
   indeterminate: boolean;
 };
 
-export class CheckboxGroupCore<T extends any> extends BaseDomain<TheTypesOfEvents<T>> {
+export class CheckboxGroupCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
   shape = "checkbox-group" as const;
 
   options: {
@@ -61,7 +61,7 @@ export class CheckboxGroupCore<T extends any> extends BaseDomain<TheTypesOfEvent
 
   prevChecked = false;
 
-  constructor(props: { _name?: string } & CheckboxGroupProps<T> = {}) {
+  constructor(props: { unique_id?: string } & CheckboxGroupProps<T> = {}) {
     super(props);
 
     const { options = [], disabled = false, onChange } = props;

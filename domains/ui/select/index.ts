@@ -8,13 +8,13 @@ import { Rect } from "@/types";
 
 import { SelectContentCore } from "./content";
 import { SelectViewportCore } from "./viewport";
-import { SelectValueCore } from "./value";
+// import { SelectValueCore } from "./value";
 import { SelectTriggerCore } from "./trigger";
 import { SelectWrapCore } from "./wrap";
 import { SelectOptionCore } from "./option";
-import { clamp } from "./utils";
+// import { clamp } from "./utils";
 
-const CONTENT_MARGIN = 10;
+// const CONTENT_MARGIN = 10;
 enum Events {
   StateChange,
   Change,
@@ -118,10 +118,15 @@ export class SelectCore<T> extends BaseDomain<TheTypesOfEvents<T>> {
     };
   }
 
-  constructor(props: Partial<{ _name: string }> & SelectProps<T>) {
+  constructor(props: Partial<{ unique_id: string }> & SelectProps<T>) {
     super(props);
 
-    const { defaultValue, placeholder = "点击选择", options = [], onChange } = props;
+    const {
+      defaultValue,
+      placeholder = "点击选择",
+      options = [],
+      onChange,
+    } = props;
     // console.log("[DOMAIN]ui/select/index - constructor", defaultValue);
     for (let i = 0; i < options.length; i += 1) {
       const opt = options[i];
@@ -483,13 +488,17 @@ type TheTypesInListOfEvents<K extends string, T> = {
   [Events.StateChange]: SelectProps<T>;
 };
 
-export class SelectInListCore<K extends string, T> extends BaseDomain<TheTypesInListOfEvents<K, T>> {
+export class SelectInListCore<K extends string, T> extends BaseDomain<
+  TheTypesInListOfEvents<K, T>
+> {
   options: SelectProps<T>["options"] = [];
   list: SelectCore<T>[] = [];
   cached = new Map<K, SelectCore<T>>();
   values: Map<K, T | null> = new Map();
 
-  constructor(props: Partial<{ _name: string } & SelectInListProps<T>> = {}) {
+  constructor(
+    props: Partial<{ unique_id: string } & SelectInListProps<T>> = {}
+  ) {
     super(props);
 
     const { options = [] } = props;
@@ -562,7 +571,9 @@ export class SelectInListCore<K extends string, T> extends BaseDomain<TheTypesIn
   onChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.Change]>) {
     this.on(Events.Change, handler);
   }
-  onStateChange(handler: Handler<TheTypesInListOfEvents<K, T>[Events.StateChange]>) {
+  onStateChange(
+    handler: Handler<TheTypesInListOfEvents<K, T>[Events.StateChange]>
+  ) {
     this.on(Events.StateChange, handler);
   }
 }

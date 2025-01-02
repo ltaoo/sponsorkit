@@ -35,7 +35,7 @@ type ToastProps = {
 export class ToastCore extends BaseDomain<TheTypesOfEvents> {
   name = "ToastCore";
 
-  present: PresenceCore;
+  $present: PresenceCore;
   delay = 1200;
   timer: NodeJS.Timeout | null = null;
   open = false;
@@ -45,20 +45,20 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
     texts: [],
   };
 
-  constructor(options: Partial<{ _name: string } & ToastProps> = {}) {
-    super(options);
+  constructor(props: Partial<{ unique_id: string } & ToastProps> = {}) {
+    super(props);
 
-    const { delay } = options;
+    const { delay } = props;
     if (delay) {
       this.delay = delay;
     }
-    this.present = new PresenceCore();
-    this.present.onShow(() => {
+    this.$present = new PresenceCore();
+    this.$present.onShow(() => {
       // console.log("[]ToastCore - this.present.onShow");
       this.open = true;
       this.emit(Events.OpenChange, true);
     });
-    this.present.onHidden(() => {
+    this.$present.onHidden(() => {
       // console.log("[]ToastCore - this.present.onHide");
       this.open = false;
       this.emit(Events.OpenChange, false);
@@ -80,7 +80,7 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
       }, this.delay);
       return;
     }
-    this.present.show();
+    this.$present.show();
     this.timer = setTimeout(() => {
       this.hide();
       this.clearTimer();
@@ -95,7 +95,7 @@ export class ToastCore extends BaseDomain<TheTypesOfEvents> {
   }
   /** 隐藏弹窗 */
   hide() {
-    this.present.hide();
+    this.$present.hide();
   }
 
   onShow(handler: Handler<TheTypesOfEvents[Events.Show]>) {

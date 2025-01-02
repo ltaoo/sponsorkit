@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BaseDomain, Handler } from "@/domains/base";
 // import { app } from "@/store";
 
-type AbsNode = {};
+type AbsNode = Record<string, unknown>;
 enum Events {
   /** 遮罩消失 */
   Dismiss,
@@ -15,7 +16,7 @@ type TheTypesOfEvents = {
   [Events.FocusOutside]: void;
   [Events.InteractOutside]: void;
 };
-type DismissableLayerState = {};
+type DismissableLayerState = Record<string, unknown>;
 
 export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
   name = "DismissableLayerCore";
@@ -28,8 +29,8 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
 
   state: DismissableLayerState = {};
 
-  constructor(options: Partial<{ _name: string }> = {}) {
-    super(options);
+  constructor(props: Partial<{ unique_id: string }> = {}) {
+    super(props);
 
     // app.onEscapeKeyDown(() => {
     //   this.emit(Events.Dismiss);
@@ -42,7 +43,7 @@ export class DismissableLayerCore extends BaseDomain<TheTypesOfEvents> {
     this.isPointerInside = true;
   }
   /** 响应冒泡到最顶层时的点击事件 */
-  handlePointerDownOnTop(absNode?: {}) {
+  handlePointerDownOnTop(absNode?: Record<string, unknown>) {
     // console.log(...this.log("handlePointerDownOnTop"));
     //     const { branches, layersWithOutsidePointerEventsDisabled } = this;
     //     const isBodyPointerEventsDisabled =

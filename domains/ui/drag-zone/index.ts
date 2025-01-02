@@ -1,4 +1,6 @@
 import { BaseDomain, Handler } from "@/domains/base";
+import { generate_unique_id } from "@/utils";
+import { base64ToFile } from "@/utils/browser";
 
 enum Events {
   StateChange,
@@ -49,7 +51,7 @@ export class DragZoneCore extends BaseDomain<TheTypesOfEvents> {
     return this._hovering;
   }
 
-  constructor(props: Partial<{ _name: string }> & DragZoneProps = {}) {
+  constructor(props: Partial<{ unique_id: string }> & DragZoneProps = {}) {
     super(props);
 
     const { tip, fill, onChange } = props;
@@ -89,7 +91,14 @@ export class DragZoneCore extends BaseDomain<TheTypesOfEvents> {
   getFileByName(name: string) {
     return this._files.find((f) => f.name === name);
   }
-  setValue() {}
+  setValue(v: string) {
+    if (v.startsWith("data:")) {
+      if (this._fill) {
+        this._files = [base64ToFile(v, generate_unique_id())];
+        this._selected = true;
+      }
+    }
+  }
 
   onChange(handler: Handler<TheTypesOfEvents[Events.Change]>) {
     return this.on(Events.Change, handler);

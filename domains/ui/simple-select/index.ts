@@ -35,7 +35,7 @@ export class SimpleSelectCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  constructor(props: Partial<{ _name: string }> & SimpleSelectCoreProps) {
+  constructor(props: Partial<{ unique_id: string }> & SimpleSelectCoreProps) {
     super(props);
 
     const { defaultValue, options } = props;

@@ -8,7 +8,7 @@ import { useInitialize } from "@/hooks/index";
 import { ToastCore } from "@/domains/ui/toast";
 import { cn } from "@/utils/index";
 
-export const Toast = React.memo((props: { store: ToastCore }) => {
+export const Toast = (props: { store: ToastCore }) => {
   const { store } = props;
 
   const [state, setState] = useState(store.state);
@@ -27,7 +27,10 @@ export const Toast = React.memo((props: { store: ToastCore }) => {
     <ToastPrimitive.Root store={store}>
       <ToastPrimitive.Portal
         store={store}
-        className={cn(state2.enter ? "animate-in fade-in" : "", state2.exit ? "animate-out fade-out" : "")}
+        className={cn(
+          state2.enter ? "animate-in fade-in" : "",
+          state2.exit ? "animate-out fade-out" : ""
+        )}
       >
         <ToastPrimitive.Content
           store={store}
@@ -48,7 +51,7 @@ export const Toast = React.memo((props: { store: ToastCore }) => {
       </ToastPrimitive.Portal>
     </ToastPrimitive.Root>
   );
-});
+};
 
 // const Overlay = (props: { store: ToastCore } & React.AllHTMLAttributes<HTMLDivElement>) => {
 //   const { store } = props;

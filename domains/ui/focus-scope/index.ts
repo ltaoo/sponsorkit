@@ -21,8 +21,8 @@ export class FocusScopeCore extends BaseDomain<TheTypesOfEvents> {
     paused: false,
   };
 
-  constructor(options: Partial<{ _name: string }> = {}) {
-    super(options);
+  constructor(props: Partial<{ unique_id: string }> = {}) {
+    super(props);
   }
 
   pause() {

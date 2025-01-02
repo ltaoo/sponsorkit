@@ -1,26 +1,71 @@
-import * as React from "react";
-// import * as SliderPrimitive from "@radix-ui/react-slider";
+import React, { useEffect, useState } from "react";
 
+import { SliderCore } from "@/domains/ui/slider";
 import { cn } from "@/utils";
 
-// const Slider = React.forwardRef<
-//   React.ElementRef<typeof SliderPrimitive.Root>,
-//   React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
-// >(({ className, ...props }, ref) => (
-//   <SliderPrimitive.Root
-//     ref={ref}
-//     className={cn(
-//       "relative flex w-full touch-none select-none items-center",
-//       className
-//     )}
-//     {...props}
-//   >
-//     <SliderPrimitive.Track className="relative h-1 w-full grow overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-//       <SliderPrimitive.Range className="absolute h-full bg-slate-900  dark:bg-slate-100" />
-//     </SliderPrimitive.Track>
-//     <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-slate-900 bg-white transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-100 dark:bg-slate-400 dark:focus:ring-slate-400 dark:focus:ring-offset-slate-900" />
-//   </SliderPrimitive.Root>
-// ));
-// Slider.displayName = SliderPrimitive.Root.displayName;
+export function Slider(
+  props: { store: SliderCore } & React.HTMLAttributes<HTMLDivElement>
+) {
+  const { store } = props;
 
-export { };
+  const [state, setState] = useState(store.state);
+
+  useEffect(() => {
+    store.onStateChange((v) => setState(v));
+  }, []);
+
+  return (
+    <div className="relative flex items-center">
+      <div className="w-[8px]"></div>
+      <div className="relative flex w-full touch-none select-none items-center">
+        <div
+          className="__a relative flex-1 h-1.5 w-full grow overflow-hidden rounded-full bg-primary/20"
+          onAnimationEnd={(event) => {
+            const { clientWidth } = event.currentTarget;
+            store.setWidth(clientWidth);
+          }}
+        >
+          <div
+            className={cn("absolute h-full bg-primary")}
+            style={{
+              left: 0,
+              right: `${100 - state.left}%`,
+            }}
+          ></div>
+        </div>
+        <div
+          className={cn(
+            "absolute block h-4 w-4 rounded-full border border-primary/50 -translate-x-1/2 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+            state.disabled ? "pointer-events-none cursor-not-allowed" : ""
+          )}
+          style={{
+            left: `${state.left}%`,
+            backgroundColor: "",
+          }}
+          onPointerDown={(event) => {
+            const { pageX: x, pageY: y } = event;
+            store.ui.$pointer.handleMouseDown({ x, y });
+            function handleMove(event: { pageX: number; pageY: number }) {
+              const { pageX: x, pageY: y } = event;
+              store.ui.$pointer.handleMouseMove({ x, y });
+            }
+            function handleUp(event: { pageX: number; pageY: number }) {
+              const { pageX: x, pageY: y } = event;
+              store.ui.$pointer.handleMouseUp({ x, y });
+              document.removeEventListener("pointermove", handleMove);
+              document.removeEventListener("pointerup", handleUp);
+            }
+            document.addEventListener("pointermove", handleMove);
+            document.addEventListener("pointerup", handleUp);
+          }}
+        ></div>
+      </div>
+      <div className="ml-4 text-slate-500">{state.value}</div>
+      {state.disabled ? (
+        <div className="absolute inset-0 bg-white opacity-60  cursor-not-allowed"></div>
+      ) : null}
+    </div>
+  );
+}
+
+export {};

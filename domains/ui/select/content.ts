@@ -1,7 +1,9 @@
-import { BaseDomain, Handler } from "@/domains/base";
+import { BaseDomain } from "@/domains/base";
 
-enum Events {}
-type TheTypesOfEvents = {};
+enum Events {
+  Change,
+}
+type TheTypesOfEvents = { [Events.Change]: void };
 type SelectContentProps = {
   $node: () => HTMLElement;
   getStyles: () => CSSStyleDeclaration;
@@ -9,13 +11,13 @@ type SelectContentProps = {
 };
 export class SelectContentCore extends BaseDomain<TheTypesOfEvents> {
   constructor(
-    options: Partial<{
-      _name: string;
+    props: Partial<{
+      unique_id: string;
     }> &
       Partial<SelectContentProps> = {}
   ) {
-    super(options);
-    const { $node, getStyles, getRect } = options;
+    super(props);
+    const { $node, getStyles, getRect } = props;
     if ($node) {
       this.$node = $node;
     }

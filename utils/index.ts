@@ -27,7 +27,7 @@ export function parseJSONStr<T extends JSONObject>(json: string) {
  * @returns
  */
 export function query_stringify(
-  query?: null | Record<string, string | number | undefined>
+  query?: null | Record<string, string | number | boolean | null | undefined>
 ) {
   if (query === null) {
     return "";

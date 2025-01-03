@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BaseDomain, Handler } from "@/domains/base";
 
 import { getPoint, damping, preventDefault, getAngleByPoints } from "./utils";
@@ -190,10 +191,10 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     };
   }
 
-  constructor(props: ScrollViewProps = {}) {
+  constructor(props: { unique_id?: string } & ScrollViewProps = {}) {
     super(props);
 
-    const { os, offset = 80, onScroll, onReachBottom, onPullToRefresh, onPullToBack } = props;
+    const { os, offset = 80, onScroll, onReachBottom, onPullToRefresh } = props;
     // console.log(props);
 
     this.options = props;
@@ -230,7 +231,9 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
   setReady() {
     this.emit(Events.Mounted);
   }
-  setRect(rect: Partial<{ width: number; height: number; contentHeight: number }>) {
+  setRect(
+    rect: Partial<{ width: number; height: number; contentHeight: number }>
+  ) {
     this.rect = {
       ...this.rect,
       ...rect,
@@ -271,12 +274,10 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     this.handlePointMove(event);
   };
   handleTouchStart = (event: TouchEvent) => {
-    // @ts-ignore
-    this.handlePointDown(event);
+    this.handlePointDown(event as any);
   };
   handleTouchMove = (event: TouchEvent) => {
-    // @ts-ignore
-    this.handlePointMove(event);
+    this.handlePointMove(event as any);
   };
   /** 鼠标/手指按下 */
   handlePointDown = (e: PointEvent) => {
@@ -291,7 +292,8 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     }
     this.startPoint = startPoint;
     this.lastPoint = this.startPoint;
-    this.maxTouchMoveInstanceY = this.getBodyHeight() - this.pullToRefreshOptions.bottomOffset;
+    this.maxTouchMoveInstanceY =
+      this.getBodyHeight() - this.pullToRefreshOptions.bottomOffset;
     this.inTouchEnd = false;
     const scrollTop = this.getScrollTop();
     // const clientHeight = this.getScrollClientHeight();
@@ -316,7 +318,11 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     if (instanceY > 0) {
       if (scrollTop <= 0) {
         preventDefault(e);
-        if (this.canPullToRefresh && !this.inTouchEnd && !this.isPullToRefreshing) {
+        if (
+          this.canPullToRefresh &&
+          !this.inTouchEnd &&
+          !this.isPullToRefreshing
+        ) {
           if (!this.inTopWhenPointDown) {
             return;
           }
@@ -325,7 +331,10 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
             return;
           }
           // 如果手指的位置超过配置的距离，则提前结束下拉，避免 Webview 嵌套导致 touchend 无法触发
-          if (this.maxTouchMoveInstanceY > 0 && curPoint.y >= this.maxTouchMoveInstanceY) {
+          if (
+            this.maxTouchMoveInstanceY > 0 &&
+            curPoint.y >= this.maxTouchMoveInstanceY
+          ) {
             this.inTouchEnd = true;
             this.handleTouchEnd();
             return;
@@ -395,7 +404,8 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     const scrollTop = this.getScrollTop();
     const isUp = scrollTop - this.preScrollY > 0;
     if (!this.isLoadingMore) {
-      const toBottom = this.getScrollHeight() - this.getScrollClientHeight() - scrollTop;
+      const toBottom =
+        this.getScrollHeight() - this.getScrollClientHeight() - scrollTop;
       if (toBottom <= this.threshold && isUp) {
         // 如果滚动条距离底部指定范围内且向上滑,则执行上拉加载回调
         // this.startReachBottom();
@@ -415,16 +425,19 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
     console.log("请在 connect 中实现 refreshRect 方法");
   }
   setBounce = (isBounce: boolean) => {
-    console.log("请在 connect 中实现 setBounce 方法");
+    console.log("请在 connect 中实现 setBounce 方法", isBounce);
   };
   changeIndicatorHeight(height: number) {
-    console.log("请在 connect 中实现 changeDownIndicatorHeight 方法");
+    console.log("请在 connect 中实现 changeDownIndicatorHeight 方法", height);
   }
   setIndicatorHeightTransition(set: boolean) {
-    console.log("请在 connect 中实现 addDownIndicatorHeightTransition 方法");
+    console.log(
+      "请在 connect 中实现 addDownIndicatorHeightTransition 方法",
+      set
+    );
   }
   optimizeScroll(optimize: boolean) {
-    console.log("请在 connect 中实现 optimizeScroll 方法");
+    console.log("请在 connect 中实现 optimizeScroll 方法", optimize);
   }
   hideIndicator = () => {
     console.log("请在 connect 中实现 hideIndicator 方法");
@@ -433,16 +446,23 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
    * 滑动列表到指定位置
    * 带缓冲效果 (y=0 回到顶部；如果要滚动到底部可以传一个较大的值，比如 99999)
    */
-  scrollTo = (position: Partial<{ left: number; top: number }>, duration = 300) => {
-    console.log("请在 connect 中实现 scrollTo 方法");
+  scrollTo = (
+    position: Partial<{ left: number; top: number }>,
+    duration = 300
+  ) => {
+    console.log("请在 connect 中实现 scrollTo 方法", duration);
   };
   /* 滚动条到底部的距离 */
   getToBottom() {
-    return this.getScrollHeight() - this.getScrollClientHeight() - this.getScrollTop();
+    return (
+      this.getScrollHeight() -
+      this.getScrollClientHeight() -
+      this.getScrollTop()
+    );
   }
   /* 获取元素到 mescroll 滚动列表顶部的距离 */
   getOffsetTop(dom: unknown) {
-    console.log("请在 connect 中实现 getScrollHeight 方法");
+    console.log("请在 connect 中实现 getScrollHeight 方法", dom);
     return 0;
   }
   /* 滚动内容的高度 */
@@ -462,7 +482,7 @@ export class ScrollViewCore extends BaseDomain<TheTypesOfEvents> {
   }
   /* 设置滚动条的位置 */
   setScrollTop(y: number) {
-    console.log("请在 connect 中实现 setScrollTop 方法");
+    console.log("请在 connect 中实现 setScrollTop 方法", y);
   }
   /* body的高度 */
   getBodyHeight() {

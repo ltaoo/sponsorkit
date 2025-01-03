@@ -12,6 +12,7 @@
     "@radix-ui/react-select": "^2.1.4",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
+    "dayjs": "^1.11.13",
     "file-saver": "^2.0.5",
     "lru-cache": "^10.4.3",
     "lucide-react": "^0.469.0",

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * @file 构建 http 请求载荷
  */
@@ -20,9 +21,14 @@ export type RequestPayload<T> = {
  * GetRespTypeFromRequestPayload
  * T extends RequestPayload
  */
-export type UnpackedRequestPayload<T> = NonNullable<T extends RequestPayload<infer U> ? (U extends null ? U : U) : T>;
-export type RequestedResource<T extends (...args: any[]) => any> = UnpackedResult<Unpacked<ReturnType<T>>>;
-export type TmpRequestResp<T extends (...args: any[]) => any> = Result<UnpackedRequestPayload<RequestedResource<T>>>;
+export type UnpackedRequestPayload<T> = NonNullable<
+  T extends RequestPayload<infer U> ? (U extends null ? U : U) : T
+>;
+export type RequestedResource<T extends (...args: any[]) => any> =
+  UnpackedResult<Unpacked<ReturnType<T>>>;
+export type TmpRequestResp<T extends (...args: any[]) => any> = Result<
+  UnpackedRequestPayload<RequestedResource<T>>
+>;
 
 let posterHandler: null | ((v: RequestPayload<any>) => void) = null;
 export function onCreatePostPayload(h: (v: RequestPayload<any>) => void) {

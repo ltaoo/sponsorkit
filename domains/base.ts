@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * 注册的监听器
  */
@@ -53,7 +54,7 @@ export function base<Events extends Record<EventType, unknown>>() {
     },
     uid,
     tip(content: { icon?: unknown; text: string[] }) {
-      emitter.emit(BaseEvents.Tip, content);
+      emitter.emit(BaseEvents.Tip, content as any);
       return content.text.join("\n");
     },
     onTip(handler: Handler<TheTypesOfBaseEvents[BaseEvents.Tip]>) {
@@ -153,7 +154,7 @@ export class BaseDomain<Events extends Record<EventType, unknown>> {
     this._emitter.emit(event, value as BaseDomainEvents<Events>[Key]);
   }
   tip(content: { icon?: unknown; text: string[] }) {
-    this._emitter.emit(BaseEvents.Tip, content);
+    this._emitter.emit(BaseEvents.Tip, content as any);
     return content.text.join("\n");
   }
   /** 主动销毁所有的监听事件 */

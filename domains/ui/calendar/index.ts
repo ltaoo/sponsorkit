@@ -1,7 +1,6 @@
-import { base, BaseDomain, Handler } from "@/domains/base";
+import { base, Handler } from "@/domains/base";
 
-import { getMonthWeeks, getWeeksInMonth } from "./utils";
-import dayjs from "dayjs";
+import { getMonthWeeks } from "./utils";
 
 type CalendarWeek = {
   id: number;
@@ -87,7 +86,7 @@ export function CalendarCore(props: CalendarCoreProps) {
 
   refreshWeeksOfMonth(today);
 
-  let _state = {
+  const _state = {
     get day() {
       return _day;
     },

@@ -20,19 +20,28 @@ const DEFAULT_CACHE_VALUES = {
   },
 };
 const key = "global";
-const e = globalThis.localStorage.getItem(key);
+const isClient = typeof window !== "undefined";
+const storageClient = (() => {
+  if (isClient) {
+    return window.localStorage;
+  }
+  return { getItem() {}, setItem() {} };
+})();
+const e = storageClient.getItem(key);
 export const storage = new StorageCore<typeof DEFAULT_CACHE_VALUES>({
   key,
   defaultValues: DEFAULT_CACHE_VALUES,
   values: e ? JSON.parse(e) : DEFAULT_CACHE_VALUES,
-  client: globalThis.localStorage,
+  client: storageClient,
 });
 
 export const user = new UserCore(storage.get("user"));
 export const app = new Application({ storage });
-connectApplication(app);
 export const client = new HttpClientCore();
-connectHttpClient(client);
+if (isClient) {
+  connectApplication(app);
+  connectHttpClient(client);
+}
 
 function handleError(err: BizError) {
   app.tip({

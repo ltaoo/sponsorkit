@@ -1,18 +1,20 @@
-import { BaseDomain, Handler } from "@/domains/base";
+import { BaseDomain } from "@/domains/base";
 
-enum Events {}
-type TheTypesOfEvents = {};
+enum Events {
+  Change,
+}
+type TheTypesOfEvents = { [Events.Change]: void };
 export class SelectViewportCore extends BaseDomain<TheTypesOfEvents> {
   constructor(
-    options: Partial<{
-      _name: string;
+    props: Partial<{
+      unique_id: string;
       $node: () => HTMLElement;
       getStyles: () => CSSStyleDeclaration;
       getRect: () => DOMRect;
     }> = {}
   ) {
-    super(options);
-    const { $node, getStyles, getRect } = options;
+    super(props);
+    const { $node, getStyles, getRect } = props;
     if ($node) {
       this.$node = $node;
     }

@@ -164,13 +164,13 @@ export default function Home() {
                             variant="secondary"
                             store={$page.ui.$export_btn}
                           >
-                            导出
+                            下载 json 文件
                           </Button>
                           <Button
                             variant="secondary"
                             store={$page.ui.$copy_btn}
                           >
-                            复制当前数据
+                            复制 json 数据
                           </Button>
                           {/* <Button
                           variant="secondary"

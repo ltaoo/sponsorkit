@@ -73,7 +73,7 @@ export default function Home() {
     >
       <div className="fixed bottom-12 right-12">
         <div className="flex items-center space-x-4">
-          <a href="https://github.com/ltaoo/AppIconsHelper" target="_blank">
+          <a href="https://github.com/ltaoo/sponsorkit" target="_blank">
             <GithubIcon className="text-gray-600 rounded-full shadow-lg hover:text-gray-800 cursor-pointer" />
           </a>
           {/* <div className="w-[56px] h-[56px] flex items-center justify-center rounded-full shadow-lg  text-gray-600 hover:text-gray-800 cursor-pointer">

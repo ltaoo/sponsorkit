@@ -166,8 +166,8 @@ export function PageLogic() {
   const $import_input = new InputCore({ defaultValue: "" });
   const $preview = SwitchCore({
     id: "preview",
-    defaultValue: true,
-    label: ["预览", "编辑"],
+    defaultValue: false,
+    label: ["编辑", "预览"],
   });
   const $token_dialog = new DialogCore();
   const $token_input = new InputCore({ defaultValue: "" });

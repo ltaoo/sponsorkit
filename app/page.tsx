@@ -56,7 +56,7 @@ const $page = PageLogic();
 
 export default function Home() {
   const [state, setState] = useState($page.state);
-  const [preview, setPreview] = useState(true);
+  const [preview, setPreview] = useState($page.ui.$preview.value);
 
   useEffect(() => {
     $page.onStateChange((v) => setState(v));

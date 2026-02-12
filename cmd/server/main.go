@@ -1,17 +1,25 @@
 package main
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strconv"
+	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -22,6 +30,8 @@ import (
 	"sponsorkit/pkg/model"
 	"sponsorkit/pkg/svg"
 )
+
+var Version = "dev"
 
 // SponsorProvider defines the interface for different sponsor data providers
 type SponsorProvider interface {
@@ -245,7 +255,88 @@ func saveToCache(key string, body []byte) string {
 	return etag
 }
 
+const pidFileName = "server.pid"
+
 func main() {
+	cmd := "run"
+	if len(os.Args) > 1 {
+		cmd = os.Args[1]
+	}
+
+	switch cmd {
+	case "start":
+		startDaemon()
+	case "stop":
+		stopDaemon()
+	case "version":
+		fmt.Println(Version)
+	case "update":
+		updateServer()
+	case "-d", "--daemon":
+		runServer()
+	default:
+		runServer()
+	}
+}
+
+func startDaemon() {
+	if _, err := os.Stat(pidFileName); err == nil {
+		fmt.Println("PID file exists. Server might be running. Check server.pid or remove it.")
+		return
+	}
+
+	exe, err := os.Executable()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	cmd := exec.Command(exe, "-d")
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+
+	logFile, err := os.OpenFile("server.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err == nil {
+		cmd.Stdout = logFile
+		cmd.Stderr = logFile
+	}
+
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := os.WriteFile(pidFileName, []byte(fmt.Sprintf("%d", cmd.Process.Pid)), 0644); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Server started with PID %d\n", cmd.Process.Pid)
+}
+
+func stopDaemon() {
+	data, err := os.ReadFile(pidFileName)
+	if err != nil {
+		fmt.Println("Server not running (no PID file)")
+		return
+	}
+
+	pid, err := strconv.Atoi(string(data))
+	if err != nil {
+		log.Fatal("Invalid PID file content")
+	}
+
+	proc, err := os.FindProcess(pid)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := proc.Signal(syscall.SIGTERM); err != nil {
+		fmt.Printf("Failed to stop server: %v\n", err)
+	} else {
+		fmt.Println("Server stopped")
+	}
+
+	os.Remove(pidFileName)
+}
+
+func runServer() {
 	// Load .env file if it exists
 	if err := godotenv.Load(); err != nil {
 		log.Printf("Info: No .env file loaded: %v", err)
@@ -264,14 +355,169 @@ func main() {
 	http.HandleFunc("/sponsors", restrictAccess(handleSponsors))
 	http.HandleFunc("/sponsors/", restrictAccess(handleSponsors))
 
+	host := os.Getenv("HOST")
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	log.Printf("Server starting on :%s", port)
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
+	addr := net.JoinHostPort(host, port)
+	log.Printf("Server starting on %s", addr)
+	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func updateServer() {
+	fmt.Println("Checking for updates...")
+
+	// 1. Get latest version
+	latestVersion, err := getLatestVersion()
+	if err != nil {
+		log.Fatalf("Failed to get latest version: %v", err)
+	}
+
+	if latestVersion == Version {
+		fmt.Printf("Already on latest version: %s\n", Version)
+		return
+	}
+
+	fmt.Printf("Found new version: %s (current: %s)\n", latestVersion, Version)
+
+	// 2. Download and install
+	if err := downloadAndInstall(latestVersion); err != nil {
+		log.Fatalf("Update failed: %v", err)
+	}
+
+	fmt.Printf("Successfully updated to %s\n", latestVersion)
+}
+
+func getLatestVersion() (string, error) {
+	// Use the same URL as install.sh to get the latest tag
+	resp, err := http.Get("https://github.com/ltaoo/sponsorkit/releases/latest")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	// GitHub redirects to the latest release page (e.g. /releases/tag/v1.0.0)
+	// The final URL contains the version
+	finalURL := resp.Request.URL.String()
+	parts := strings.Split(finalURL, "/")
+	version := parts[len(parts)-1]
+
+	if version == "" || version == "latest" {
+		return "", fmt.Errorf("could not determine version from URL: %s", finalURL)
+	}
+
+	return version, nil
+}
+
+func downloadAndInstall(version string) error {
+	osType := runtime.GOOS
+	arch := runtime.GOARCH
+
+	// Map arch to install.sh conventions
+	if arch == "amd64" {
+		arch = "x86_64"
+	} else if arch == "arm64" {
+		arch = "arm64"
+	} else {
+		return fmt.Errorf("unsupported architecture: %s", arch)
+	}
+
+	filename := fmt.Sprintf("sponsorkit_%s_%s_%s.tar.gz", version, osType, arch)
+	downloadURL := fmt.Sprintf("https://github.com/ltaoo/sponsorkit/releases/download/%s/%s", version, filename)
+
+	fmt.Printf("Downloading %s...\n", downloadURL)
+
+	resp, err := http.Get(downloadURL)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to download: status %d", resp.StatusCode)
+	}
+
+	// Create temp file for tar.gz
+	tmpDir := os.TempDir()
+	tarballPath := filepath.Join(tmpDir, filename)
+	out, err := os.Create(tarballPath)
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tarballPath)
+
+	_, err = io.Copy(out, resp.Body)
+	out.Close()
+	if err != nil {
+		return err
+	}
+
+	// Extract
+	fmt.Println("Extracting...")
+	f, err := os.Open(tarballPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	gzr, err := gzip.NewReader(f)
+	if err != nil {
+		return err
+	}
+	defer gzr.Close()
+
+	tr := tar.NewReader(gzr)
+
+	var binaryData []byte
+	found := false
+
+	for {
+		header, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		if header.Name == "sponsorkit" {
+			binaryData, err = io.ReadAll(tr)
+			if err != nil {
+				return err
+			}
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("binary 'sponsorkit' not found in archive")
+	}
+
+	// Replace current binary
+	currentExe, err := os.Executable()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Replacing %s...\n", currentExe)
+
+	// Write to a temporary file first
+	tmpExe := currentExe + ".new"
+	if err := os.WriteFile(tmpExe, binaryData, 0755); err != nil {
+		return err
+	}
+
+	// Rename to overwrite
+	if err := os.Rename(tmpExe, currentExe); err != nil {
+		os.Remove(tmpExe)
+		return err
+	}
+
+	return nil
 }
 
 // restrictAccess Middleware for restricting access to specific origins/IPs

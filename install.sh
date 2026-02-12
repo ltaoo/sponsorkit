@@ -2,7 +2,7 @@
 set -e
 
 REPO="ltaoo/sponsorkit"
-BINARY="wx_video_download"
+BINARY="sponsorkit"
 
 # Detect OS
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')

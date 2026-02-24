@@ -25,6 +25,63 @@ Deploy with Vercel
 
 > 或者有什么简单的数据存储方案可以推荐一下，最终预期效果可以是在页面上点击「保存」按扭即可生效。
 
+## Golang 服务端
+
+如果你希望动态管理赞助者数据（支持飞书多维表格或 Cloudflare D1），可以使用 Golang 版本部署。
+
+### 安装
+
+目前提供 Linux (x86_64/arm64) 的一键安装脚本：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/ltaoo/sponsorkit/main/install.sh | bash
+```
+
+### 配置
+
+在运行目录下创建 `.env` 文件：
+
+```bash
+# 服务监听地址
+HOST=0.0.0.0
+PORT=8080
+
+# 鉴权 Token (前端页面登录需要与此一致)
+TOKEN=your_token_value
+
+# 数据源提供者 (feishu 或 cloudflare)
+PROVIDER=feishu
+
+# Feishu (飞书) 配置
+FEISHU_APP_ID=cli_xxx
+FEISHU_APP_SECRET=xxx
+FEISHU_BASE_TOKEN=basxxx
+FEISHU_TABLE_ID=tblxxx
+FEISHU_VIEW_ID=vewxxx  # 可选
+FEISHU_SORT=["赞赏时间 ASC"] # 可选
+
+# Cloudflare D1 配置
+CLOUDFLARE_API_TOKEN=xxx
+CLOUDFLARE_ACCOUNT_ID=xxx
+CLOUDFLARE_DATABASE_ID=xxx
+```
+
+### 使用
+
+```bash
+# 启动服务 (后台运行)
+sponsorkit start
+
+# 停止服务
+sponsorkit stop
+
+# 检查更新
+sponsorkit update
+
+# 前台运行 (调试用)
+sponsorkit -d
+```
+
 ## 效果预览
 
 ![My Sponsors](https://sponsorkit-iota.vercel.app/api/sponsors)

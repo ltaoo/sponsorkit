@@ -103,16 +103,16 @@ func (p *FeishuProvider) GetConfig() (*model.SponsorConfig, error) {
 }
 
 func (p *FeishuProvider) GetSponsorList(page, pageSize int) ([]model.Sponsor, int64, error) {
-	list, total, err := feishu.GetSponsorList(p.client, p.baseToken, p.tableID, p.viewID, page, pageSize, p.sort)
+	resp, err := feishu.GetSponsorList(p.client, p.baseToken, p.tableID, p.viewID, page, pageSize, p.sort)
 	if err != nil {
 		return nil, 0, err
 	}
-	for i := range list {
-		if list[i].Link == "" {
-			list[i].Name = maskName(list[i].Name)
+	for i := range resp.Items {
+		if resp.Items[i].Link == "" {
+			resp.Items[i].Name = maskName(resp.Items[i].Name)
 		}
 	}
-	return list, total, nil
+	return resp.Items, resp.Total, nil
 }
 
 // CloudflareProvider implements SponsorProvider for Cloudflare D1

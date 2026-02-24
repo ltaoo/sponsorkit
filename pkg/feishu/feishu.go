@@ -103,18 +103,50 @@ func GetLinkFromField(field interface{}) string {
 	return ""
 }
 
+type SponsorListResp struct {
+	Items []model.Sponsor `json:"items"`
+	Total int64           `json:"total"`
+}
+
 // GetSponsorList fetches sponsors with pagination
-func GetSponsorList(client *lark.Client, baseToken, tableID, viewID string, page, pageSize int, sort string) ([]model.Sponsor, int64, error) {
+func GetSponsorList(client *lark.Client, baseToken, tableID, viewID string, page, pageSize int, sort string) (*SponsorListResp, error) {
 	// Fetch all records first (Feishu API limitation for efficient random access pagination)
 	records, err := GetTableRecords(client, baseToken, tableID, viewID, sort)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
 	total := int64(len(records))
+
+	// 生成 ID 映射
+	nameToID := make(map[string]string)
+	idCounter := 1
+	for _, fields := range records {
+		name, _ := fields["赞赏者名称"].(string)
+		if name != "" {
+			var id string
+			if name == "匿名" {
+				id = fmt.Sprintf("%d", idCounter)
+				idCounter++
+			} else {
+				if existingID, exists := nameToID[name]; exists {
+					id = existingID
+				} else {
+					id = fmt.Sprintf("%d", idCounter)
+					nameToID[name] = id
+					idCounter++
+				}
+			}
+			fields["_id"] = id
+		}
+	}
+
 	start := (page - 1) * pageSize
 	if start >= int(total) {
-		return []model.Sponsor{}, total, nil
+		return &SponsorListResp{
+			Items: []model.Sponsor{},
+			Total: total,
+		}, nil
 	}
 	end := start + pageSize
 	if end > int(total) {
@@ -131,6 +163,7 @@ func GetSponsorList(client *lark.Client, baseToken, tableID, viewID string, page
 		note, _ := fields["备注"].(string)
 
 		if name != "" {
+			id, _ := fields["_id"].(string)
 			items = append(items, model.Sponsor{
 				Name:   name,
 				Avatar: avatar,
@@ -138,11 +171,15 @@ func GetSponsorList(client *lark.Client, baseToken, tableID, viewID string, page
 				Time:   timeVal,
 				Amount: amount,
 				Note:   note,
+				ID:     id,
 			})
 		}
 	}
 
-	return items, total, nil
+	return &SponsorListResp{
+		Items: items,
+		Total: total,
+	}, nil
 }
 
 // ParseTime handles different types for the time field (string, float64/int64 timestamp)

@@ -22,4 +22,5 @@ type Sponsor struct {
 	Amount string `json:"amount"`
 	Note   string `json:"note,omitempty"`
 	From   string `json:"from,omitempty"`
+	ID     string `json:"id"`
 }

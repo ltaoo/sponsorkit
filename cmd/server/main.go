@@ -108,7 +108,9 @@ func (p *FeishuProvider) GetSponsorList(page, pageSize int) ([]model.Sponsor, in
 		return nil, 0, err
 	}
 	for i := range list {
-		list[i].Name = maskName(list[i].Name)
+		if list[i].Link == "" {
+			list[i].Name = maskName(list[i].Name)
+		}
 	}
 	return list, total, nil
 }

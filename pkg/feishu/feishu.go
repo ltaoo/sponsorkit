@@ -87,6 +87,22 @@ func GetImageFromField(field interface{}) string {
 	return ""
 }
 
+// GetLinkFromField extracts URL from a Feishu Link field
+func GetLinkFromField(field interface{}) string {
+	if field == nil {
+		return ""
+	}
+	switch v := field.(type) {
+	case string:
+		return v
+	case map[string]interface{}:
+		if link, ok := v["link"].(string); ok {
+			return link
+		}
+	}
+	return ""
+}
+
 // GetSponsorList fetches sponsors with pagination
 func GetSponsorList(client *lark.Client, baseToken, tableID, viewID string, page, pageSize int, sort string) ([]model.Sponsor, int64, error) {
 	// Fetch all records first (Feishu API limitation for efficient random access pagination)
@@ -109,7 +125,7 @@ func GetSponsorList(client *lark.Client, baseToken, tableID, viewID string, page
 	for _, fields := range records[start:end] {
 		name, _ := fields["赞赏者名称"].(string)
 		avatar := GetImageFromField(fields["赞赏者头像链接"])
-		link, _ := fields["赞赏者个人主页链接"].(string)
+		link := GetLinkFromField(fields["赞赏者个人主页链接"])
 		timeVal := ParseTime(fields["赞赏时间"])
 		amount, _ := fields["赞赏金额"].(string)
 		note, _ := fields["备注"].(string)
